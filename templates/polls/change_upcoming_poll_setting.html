@@ -1,0 +1,378 @@
+{% extends "base/base.html" %}
+{% load staticfiles %}
+
+{% block head %}
+    <style>
+        .selectable .ui-selecting .thumbnail { border: 5px solid #ac5f31;}
+        .selectable .ui-selected  .thumbnail { border: 5px solid #e7722f;}
+
+    </style>
+{% endblock %}
+
+{% block content %}
+    <div class = "container">
+        <h1>Enter the new settings</h1>
+        <div class="jumbotron">
+            <div class="col-md-offset-1">
+                <form method="post" role = "form" action="{% url 'polls:setup' poll.pk %}">
+                    {% csrf_token %}
+                    {% if set_up_poll_form.non_field_errors %}
+                        <div class="form-group">
+                            <p><strong>{{ set_up_poll_form.non_field_errors }}</strong></p>
+                        </div>
+                    {% endif %}
+                    <div class = "row">
+                    <h2 class="text-muted">Name &amp; description of the poll</h2>
+                        <div class="form-group">
+                            <label class="control-label" for="id_poll_name">Name of the poll</label>
+                            <input type="text" class="form-control" id="id_poll_name" name="poll_name" value= "{{ set_up_poll_form.poll_name.value }}">
+                            {% if set_up_poll_form.poll_name.errors %}<p><strong>{{ set_up_poll_form.poll_name.errors }}</strong></p>{% endif %}
+                        </div>
+
+                        <div class="form-group">
+                            <label class="control-label" for="id_poll_question">Question of the poll</label>
+                            <input type="text" class="form-control" id="id_poll_question" name="poll_question" value="{{ set_up_poll_form.poll_question.value }}">
+                        </div>
+                        <div class="form-group">
+                            {% if set_up_poll_form.poll_description.errors %}<p><strong>{{ set_up_poll_form.poll_description.errors }}</strong></p>{% endif %}
+                            <label class="control-label" for="id_poll_description">Description</label>
+                            <textarea class="form-control" rows="3" id="id_poll_description" name="poll_description">{{ set_up_poll_form.poll_description.value }}</textarea>
+                        </div>
+                    </div>
+                    <div class = "row">
+                            <h2 class="text-muted">Input and output</h2>
+                    </div>
+
+                    <div class="row selectable" id="selectable-input">
+                        {% if set_up_poll_form.input_type.errors %}{{ set_up_poll_form.input_type.errors }}{% endif %}
+                        <div  class="col-md-2 col-md-offset-1 ui-widget-content {% if set_up_poll_form.input_type.value == 'Pf' %}ui-selected{%  endif %}"
+                              id="Pf">
+                            <div class="thumbnail">
+                                <img class='img-responsive' class='img-responsive' src= "{% static 'polls/images/input_most_pref.png' %}" height="150 " width="150" alt="">
+                            </div>
+                            <p>Most preferred alternative</p>
+                        </div>
+                        <div  class="col-md-2 ui-widget-content {% if set_up_poll_form.input_type.value == 'Di' %}ui-selected{%  endif %}"
+                              id="Di">
+                            <div class="thumbnail">
+                                <img class='img-responsive' class='img-responsive' src= "{% static 'polls/images/input_dicot.png' %}" height="150 " width="150" alt="">
+                            </div>
+                            <p> Approval</p>
+                        </div>
+                        <div  class="col-md-2 ui-widget-content  {% if set_up_poll_form.input_type.value == 'Li' %}ui-selected{%  endif %}"
+                              id="Li">
+                            <div class="thumbnail">
+                                <img class='img-responsive' class='img-responsive' src= "{% static 'polls/images/input_borda.png' %}" height="150 " width="150" alt="">
+                            </div>
+                            <p> Rankings without ties</p>
+                        </div>
+                        <div  class="col-md-2 ui-widget-content  {% if set_up_poll_form.input_type.value == 'Pd' %}ui-selected{%  endif %}"
+                              id="Pd">
+                            <div class="thumbnail">
+                                <img class='img-responsive' class='img-responsive' src= "{% static 'polls/images/input_partial_borda.png' %}" height="150 " width="150" alt="">
+                            </div>
+                            <p> Rankings with ties</p>
+                        </div>
+                        <div  class="col-md-2 ui-widget-content {% if set_up_poll_form.input_type.value == 'Bi' %}ui-selected{%  endif %}"
+                              id="Bi">
+                            <div class="thumbnail">
+                                <img class='img-responsive' class='img-responsive' src= "{% static 'polls/images/input_complete.png' %}" height="150 " width="150" alt="">
+                            </div>
+                            <p>Pairwise comparisons</p>
+                        </div>
+                    </div>
+
+                    <div id="hidden-input-type">
+                        {% if set_up_poll_form.input_type.value %}
+                            <input type="hidden" name="input_type" value = "{{ set_up_poll_form.input_type.value }}">
+                        {% endif %}
+                    </div>
+
+                     <div class="row selectable" id="selectable-output">
+                         {% if set_up_poll_form.output_type.errors %}{{ set_up_poll_form.output_type.errors }}{% endif %}
+                        <div  class="col-md-2 col-md-offset-1 ui-widget-content {% if set_up_poll_form.output_type.value == 'B' %}ui-selected{%  endif %}"
+                              id="B">
+                            <div class="thumbnail">
+                                <img class='img-responsive' class='img-responsive' src= "{% static 'polls/images/output_alternative.png' %}" height="150 " width="150" alt="">
+                            </div>
+                            <p>Unique winner</p>
+                        </div>
+                        <div  class="col-md-2 col-md-offset-1 ui-widget-content {% if set_up_poll_form.output_type.value == 'L' %}ui-selected{%  endif %}"
+                              id="L">
+                            <div class="thumbnail">
+                                <img class='img-responsive' class='img-responsive' src= "{% static 'polls/images/output_lottery.png' %}" height="150 " width="150" alt="">
+                            </div>
+                            <p>Lottery</p>
+                        </div>
+                        <div  class="col-md-2 col-md-offset-1 ui-widget-content {% if set_up_poll_form.output_type.value == 'R' %}ui-selected{%  endif %}"
+                              id="R">
+                            <div class="thumbnail">
+                                <img class='img-responsive' class='img-responsive' src= "{% static 'polls/images/output_ranking.png' %}" height="150 " width="150" alt="">
+                            </div>
+                            <p>Rankings without ties</p>
+                        </div>
+                    </div>
+                    <div id="hidden-output-type">
+                        {% if set_up_poll_form.output_type.value %}
+                            <input type="hidden" name="output_type" value = "{{ set_up_poll_form.output_type.value }}">
+                        {% endif %}
+                    </div>
+                    <div class = "row">
+                        <h2 class="text-muted">Visibility of the results and timeframe</h2>
+                        <div class="form-group">
+                            <label>Temporary results:</label>
+                            {% if set_up_poll_form.temporary_result.errors %}
+                                <p><strong>{{ set_up_poll_form.temporary_result.errors }}</strong></p>
+                            {% endif %}
+                            <div class="checkbox">
+                                <input type="checkbox" id="id_poll_temporary_result" name="poll_temporary_result"
+                                       data-size="small" data-on-text="Yes" data-off-text="No"
+                                       {% if set_up_poll_form.poll_temporary_result.value %}checked {% endif %}>
+                                <label for="id_poll_temporary_result">&nbsp;Voters are able to see the temporary results</label>
+                            </div>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label>Visibility of the poll:</label>
+                            {% if set_up_poll_form.poll_private.errors %}
+                                <p><strong>{{ set_up_poll_form.poll_private.errors }}
+                            {% endif %}
+
+                            <div class="checkbox">
+                                <input type="checkbox" id="id_poll_private" name="poll_private"
+                                       data-size="small" data-on-text="&nbsp;Private&nbsp;" data-off-text="&nbsp;Public&nbsp;"
+                                        {% if set_up_poll_form.poll_private.value %}
+                                       checked="{{ set_up_poll_form.poll_private.value }}"
+                                        {% endif %}>
+                                <label id="id_label-poll_private" for="id_poll_private">&nbsp; Only <strong>registered voters</strong> can participate</label>
+                                <label id="id_label-poll_public" for="id_poll_private"><strong>&nbsp; Everyone</strong> can vote</label>
+                            </div>
+                        </div>
+                        <div class="form-group to-hide-private">
+                            <div class="checkbox">
+                                <input type="checkbox" id="id_poll_change_vote" name="poll_change_vote"
+                                       data-size="small" data-on-text="Yes" data-off-text="No"
+                                        {% if set_up_poll_form.poll_change_vote.value %}
+                                       checked="{{ set_up_poll_form.poll_change_vote.value }}"
+                                        {% endif %}>
+                                <label>&nbsp; Voters can change their votes</label>
+                            </div>
+                        </div>
+                        <div class="input-group col-md-6"> <span class="input-group-addon">Opening date</span>
+                            <input type="datetime"  id="id_opening_date" name="opening_date" class="form-control"  value = "{{ set_up_poll_form.opening_date.value }}">
+                        </div>
+                        {% if  set_up_poll_form.opening_date.errors %}<p><strong>{{ set_up_poll_form.opening_date.errors }}</strong></p>{% endif %}
+                        <br>
+                        <div class="input-group col-md-6"> <span class="input-group-addon">Closing date &nbsp;</span>
+                            <input type="datetime" id="id_closing_date" name="closing_date" class="form-control" value = "{{ set_up_poll_form.closing_date.value }}">
+                        </div>
+                        {% if set_up_poll_form.closing_date.errors %}<p><strong>{{ set_up_poll_form.closing_date.errors }}</strong></p>{% endif %}
+                        <br>
+                    </div>
+
+                    <div class="row">
+                        <h2 class="text-muted">Alternatives and tie breaking</h2>
+                    
+                        <div class="form-group">
+                            <label for="id_tie_breaking">Tie breaking:</label>
+                            {% if form.tie_breaking.errors %}{{ form.tie_breaking.errors }}{% endif %}
+
+                            <div class="checkbox">
+                                <input type="checkbox"
+                                       id="id_tie_breaking"
+                                       name="tie_breaking"
+                                       data-size="default" data-on-text="&nbsp;Customized&nbsp;" data-off-text="&nbsp;Randomized&nbsp;"
+                                        {% if set_up_poll_form.tie_breaking.value %}
+                                       checked="{{ set_up_poll_form.tie_breaking.value }}"
+                                        {% endif %}>
+                                <label id="id_label_tie_breaking_random" for="id_tie_breaking">&nbsp; The tie breaking rule is <strong>randomly</strong> chosen</label>
+                                <label id="id_label_tie_breaking_custom" for="id_tie_breaking">&nbsp; You <strong>define</strong> the tie breaking rule </label>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row to-hide-tie-breaking">
+                        <div class="form-group">
+                            <p class="help-block"> The lexicographic order should contain all alternatives. </p>
+                            <div class="form-group">
+                                <label class="control-label" for="id_tie_breaking_rule">Tie breaking rule</label>
+                                {% if set_up_poll_form.tie_breaking_rule.errors %}{{ set_up_poll_form.tie_breaking_rule.errors }}{% endif %}
+                                <textarea class="form-control" rows="2" id="id_tie_breaking_rule"
+                                          name="tie_breaking_rule" placeholder="eg : A > B > C"
+                                        {% if set_up_poll_form.tie_breaking.value != 'Custom' %}
+                                          disabled
+                                        {% endif %}>{% if set_up_poll_form.tie_breaking_rule.value %}{{ set_up_poll_form.tie_breaking_rule.value }}{% endif %}</textarea>
+                            </div>
+                        </div>
+                    </div>
+                    {% if not poll.recursive_poll %}
+                        <div class = "row">
+                            <div class="form-group">
+                                <label class="control-label" for="id_alternative_to_add">Add new alternatives</label>
+                                {% if set_up_poll_form.alternative_to_add.errors %}<p><strong>{{ set_up_poll_form.alternative_to_add.errors }}</strong></p>{% endif %}
+                                <textarea class="form-control" rows="3" id="id_alternative_to_add" name="alternative_to_add" >{% if set_up_poll_form.alternative_to_add.value %}{{ set_up_poll_form.alternative_to_add.value }}{%  endif %}</textarea>
+                            </div>
+                        </div>
+                        <div class = "row">
+                            <div class="form-group">
+                                <label for="id_alternative_to_remove">Select the alternatives you want to remove</label>
+                                {% if set_up_poll_form.alternative_to_remove.errors %}<p><strong>{{ set_up_poll_form.alternative_to_remove.errors }}</strong></p>{% endif %}
+                                <select class="form-control" id="id_alternative_to_remove" name="alternative_to_remove" multiple="multiple">
+                                    {% for alternative in poll.alternative_set.all %}
+                                        <option>{{ alternative.name }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                        </div>
+                    {% endif %}
+                    <div class = "row">
+                        <h2 class="text-muted">Voters</h2>
+                        <div class="form-group">
+                            <label class="control-label" for="id_voter_to_add">Add new voters here</label>
+                            {% if set_up_poll_form.voter_to_add.errors %}<p><strong>{{ set_up_poll_form.voter_to_add.errors }}</strong></p>{% endif %}
+                            <textarea class="form-control" rows="3" id="id_voter_to_add" name="voter_to_add" >{% if set_up_poll_form.voter_to_add.value %}{{ set_up_poll_form.voter_to_add.value }}{%  endif %}</textarea>
+                        </div>
+                    </div>
+                    <div class = "row">
+                        <div class="form-group">
+                            <label for="id_voter_to_remove">Select the voters you want to remove</label>
+                            {% if set_up_poll_form.voter_to_remove.errors %}<p><strong>{{ set_up_poll_form.voter_to_remove.errors }}</strong></p>{% endif %}
+                            <select class="form-control" id="id_voter_to_remove" name="voter_to_remove" multiple="multiple">
+                                {% for participant in participant %}
+                                    <option>{{ participant.email }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </div>
+                    <div class ='row'>
+                        <br>
+                        <div class="form-group">
+                            <input type="submit" class="btn btn-default pull-right" value="Save">
+                            <a class="btn btn-default" href="{% url 'polls:detail' poll.pk %}" role="button"> &laquo; Back</a>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+
+{% block js_block %}
+    <script type="text/javascript" src="{% static 'jquery/js/jquery-ui-1.11.0.js' %}"></script>
+    <script type="text/javascript" src="{% static 'jquery/js/jquery-ui-touch-punch.js' %}"></script>
+    <script type="text/javascript">
+
+        $(function(){
+
+            //init poll_temporary_result switch
+            $("#id_poll_temporary_result").bootstrapSwitch();
+
+            //init poll_change_vote switch
+            $("#id_poll_change_vote").bootstrapSwitch();
+
+            //init private-poll switch
+            $('#id_poll_private').bootstrapSwitch();
+            if ($('#id_poll_private').is(':checked')){
+                $('.to-hide-private').show();
+                $('#id_label-poll_private').show();
+                $('#id_label-poll_public').hide();
+            }
+            else{
+                $('#id_poll_change_vote').bootstrapSwitch('state', false , true);
+                $('#id_poll_change_vote').prop("checked", false);
+                $('.to-hide-private').hide();
+                $('#id_label-poll_private').hide();
+                $('#id_label-poll_public').show();
+            }
+            
+                        //show or hide change vote switch based on visibility
+            $('#id_poll_private').on('switchChange.bootstrapSwitch', function(event, state) {
+                if (state == true){
+                    $('.to-hide-private').show();
+                    $('#id_label-poll_private').show();
+                    $('#id_label-poll_public').hide();
+                }
+                else{
+                    $('#id_poll_change_vote').bootstrapSwitch('state', false , true);
+                    $('#id_poll_change_vote').prop("checked", false);
+                    $('.to-hide-private').hide();
+                    $('#id_label-poll_private').hide();
+                    $('#id_label-poll_public').show();
+                }
+            });
+            
+            //init tie_breaking switch
+            $("#id_tie_breaking").bootstrapSwitch();
+            if ($('#id_tie_breaking').is(':checked')){
+                $('.to-hide-tie-breaking').show();
+                $('#id_tie_breaking_rule').prop("disabled", false);
+                $('#id_label_tie_breaking_custom').show();
+                $('#id_label_tie_breaking_random').hide();
+            }
+            else{
+                $('.to-hide-tie-breaking').hide();
+                $('#id_label_tie_breaking_custom').hide();
+                $('#id_label_tie_breaking_random').show();
+                $('#id_tie_breaking_rule').attr("disabled", 'disabled');
+            }
+
+            //show or hide tie_breaking
+            $('#id_tie_breaking').on('switchChange.bootstrapSwitch', function(event, state) {
+                if (state == true){
+                    $('.to-hide-tie-breaking').show();
+                    $('#id_tie_breaking_rule').prop("disabled", false);
+                    $('#id_label_tie_breaking_custom').show();
+                    $('#id_label_tie_breaking_random').hide();
+                }
+                else{
+                    $('.to-hide-tie-breaking').hide();
+                    $('#id_label_tie_breaking_custom').hide();
+                    $('#id_label_tie_breaking_random').show();
+                    $('#id_tie_breaking_rule').attr("disabled", 'disabled');
+                }
+            });
+           
+            //input selectable
+            $("#selectable-input").selectable({
+                selected: function(event, ui) { // prevent to select several alternative
+                    $(ui.selected).addClass("ui-selected").siblings().removeClass("ui-selected");
+                },
+
+                stop: function() {
+                    $( "#hidden-input-type > input").remove( );
+                    $( ".ui-selected", this ).each(function() {
+                        var value = $(this).attr('id') ;
+                        if ( value != null) {
+                            $('<input>').attr({
+                                type: 'hidden',
+                                name: 'input_type',
+                                value: value
+                            }).appendTo('#hidden-input-type');
+                        }
+                    });
+                }
+
+            });
+
+            //output selectable
+             $("#selectable-output").selectable({
+                selected: function(event, ui) { // prevent to select several alternative
+                    $(ui.selected).addClass("ui-selected").siblings().removeClass("ui-selected");
+                },
+
+                stop: function() {
+                    $( "#hidden-output-type > input").remove( );
+                    $( ".ui-selected", this ).each(function() {
+                        var value = $(this).attr('id') ;
+                        if ( value != null) { 
+                            $('<input>').attr({
+                                type: 'hidden',
+                                name: 'output_type',
+                                value: value
+                            }).appendTo('#hidden-output-type');
+                        }
+                    });
+                }
+            });
+        });
+    </script>
+{% endblock %}

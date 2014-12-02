@@ -1,0 +1,170 @@
+{% extends "base/base.html" %}
+{% load staticfiles %}
+{% load static %}
+
+{% block content %}
+    <div class="container">
+        <h1>Configuration of the poll : {{poll}}</h1>
+
+        <div class="jumbotron">
+            <div class="container">
+                <div class="row">
+                    <div class="col-md-8">
+                        <h2>General settings of the poll:</h2>
+                        <div class="col-md-offset-1">
+                            <h3 class="text-muted">Name &amp; description:</h3>
+                            <p><b>Question:</b> {{ poll.question }}</p>
+                            {% if poll.description %}
+                                <p><b>Description:</b> {{ poll.description }}</p>
+                            {% endif %}
+                            <h3 class="text-muted">Timeframe</h3>
+                            <p><b>Progress:</b> {{ poll.get_progress }}%</p>
+                            <p><b>Opening date:</b> {{ poll.opening_date|date:"d/m/Y" }}, {{ poll.opening_date|time:"H:i" }}</p>
+                            <p><b>Closing date:</b> {{ poll.closing_date|date:"d/m/Y" }}, {{ poll.closing_date|time:"H:i" }}</p>
+                            <p><b>Periodic poll: </b> {{ poll.recursive_poll }}</p>
+                            {% if poll.recursive_poll %}
+                            <p><b>Period of the poll: </b>{{ poll.recursive_period }} day{{ poll.recursive_period | pluralize }}</p>
+                            {%  endif %}
+                            <h3 class="text-muted">Visibility</h3>
+                            <p><b>Temporary results: </b> {{ poll.temporary_result }}</p>
+                            <p><strong>Visibility: </strong>
+                            {% if poll.private %}
+                            Private
+                            {% else %}
+                            Public
+                            {% endif %}</p>
+                            {% if poll.private %}
+                            <p><b>Voter can change their vote:</b>{{ poll.change_vote }}</p>
+                            {%  endif %}
+                            <h3 class="text-muted">Tie breaking</h3>
+                            {% if poll.tie_breaking == 'Custom'%}
+                                <p><b>Tie breaking: </b>{{ tie_breaking_rule }}</p>
+                            {% else %}
+                                <p><b>Tie breaking:</b> Randomized<p>
+                            {% endif %}
+                            </p>
+                        </div>
+                    </div>
+                    {# Display the icons for inputs and outputs #}
+                    <div class="col-md-2">
+                        <div class="thumbnail">
+                            {% if poll.input_type ==  'Pf'  %}
+                                <img class='img-responsive' src="{% static 'polls/images/input_most_pref.png' %}" height="150 " width="150" >
+                                <div class="caption">
+                                    <p style ="font-size:105%">Most preferred alternative</p>
+                                </div>
+                            {% elif poll.input_type == 'Di'  %}
+                                <img class='img-responsive' src="{% static 'polls/images/input_dicot.png' %}" height="150 " width="150" >
+                                <div class="caption">
+                                    <p style ="font-size:105%">Approved alternatives</p>
+                                </div>
+                            {% elif poll.input_type == 'Li' %}
+                                <img class='img-responsive' src="{% static 'polls/images/input_borda.png' %}" height="150 " width="150" >
+                                <div class="caption">
+                                    <p style ="font-size:105%">Rankings without ties</p>
+                                </div>
+                            {% elif poll.input_type == 'Pd' %}
+                                <img class='img-responsive' src="{% static 'polls/images/input_partial_borda.png' %}" height="150 " width="150" >
+                                <div class="caption">
+                                    <p style ="font-size:105%">Rankings with ties</p>
+                                </div>
+                            {% elif poll.input_type == 'Bi' %}
+                                <img class='img-responsive' src="{% static 'polls/images/input_complete.png' %}" height="150 " width="150" >
+                                <div class="caption">
+                                    <p style ="font-size:105%">Pairwise comparisons</p>
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                    <div class="col-md-2">
+                        <div class="thumbnail">
+                            {% if poll.output_type == 'B' %}
+                                <img class='img-responsive' src="{% static 'polls/images/output_alternative.png' %}" height="150 " width="150" >
+                                <div class="caption">
+                                    <p style ="font-size:105%">Unique winner</p>
+                                </div>
+                            {% elif poll.output_type == 'L' %}
+                                <img class='img-responsive' src="{% static 'polls/images/output_lottery.png' %}" height="150 " width="150" >
+                                <div class="caption">
+                                    <p style ="font-size:105%">Lottery</p>
+                                </div>
+                            {% elif poll.output_type == 'R' %}
+                                <img class='img-responsive' src="{% static 'polls/images/output_ranking.png' %}" height="150 " width="150" >
+                                <div class="caption">
+                                    <p style ="font-size:105%">Rankings without ties</p>
+                                </div>
+                            {%  endif %}
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-6">
+                        <h2><b>Alternatives: </b></h2>
+                        <div class="col-md-offset-1">
+                            {% for alternative in poll.alternative_set.all %}
+                                <p>{{ alternative.name }} {% if alternative.description %}: {{ alternative.description }} {%  endif %}</p>
+                            {% endfor %}
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <h2><b>Participants: </b></h2>
+                        <div class="col-md-offset-1">
+                            {% for participant in poll.participant.all %}
+                                <p>{{ participant }}</p>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+                <h2><b>Useful links: </b></h2><br>
+                <div class="row">
+                    <div class="col-md-12 col">
+                        <div class="btn-group">
+                            <a type="button" class="btn btn-default" href="{% url 'vote:temp_results' poll.pk 'admin'%}" role="button">Link to the temporary results</a>
+                            <a type="button" class="btn btn-default" href="{% url 'vote:results' poll.pk 'admin' %}" role="button">Link to the final results</a>
+                            <a type="button" class="btn btn-default" href="{% url 'polls:email_participant' poll.pk %}" role="button">Email participants</a>
+                            <a type="button" class="btn btn-default" href="{% url 'polls:preflib' poll.pk %}" role="button">Preference profile</a>
+                            {% if not poll.private %}
+                                <a type="button" class="btn btn-default" href="{% url 'vote:get_ballot_view' poll.pk 'public'%}" role="button">Link to the ballot</a>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-12 col">
+                        <br>
+                        <button class="btn btn-warning" data-toggle="modal" data-target="#myModal">
+                            Delete poll
+                        </button>
+                    </div>
+                </div>
+                <!-- Modal -->
+                <div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+                    <div class="modal-dialog">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Cancel</span></button>
+                                <h4 class="modal-title" id="myModalLabel">Delete the poll {{ poll.name }}</h4>
+                            </div>
+                            <div class="modal-body">
+                                You are about to delete this poll and the related data from the database. This operation is irreversible.
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
+                                <a type="button" class="btn btn-warning" href="{% url 'polls:delete_poll' poll.pk %}" role="button">Delete poll</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <br><br>
+                <div class = "raw">
+                    <div class="col-md-12">
+                        <a class="btn btn-default" href="{% url 'polls:manage_poll' %}" role="button"> &laquo; Back</a>
+                        <a class="btn btn-default pull-right" href="{% url 'polls:setup' poll.pk %}" role="button"> Change settings &raquo;</a>
+                    </div>
+                </div>
+                <br>
+            </div>
+        </div>
+    </div>
+
+{%  endblock %}

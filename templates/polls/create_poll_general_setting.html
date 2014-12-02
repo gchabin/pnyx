@@ -1,0 +1,175 @@
+{% extends "polls/wizard_create_poll.html" %}
+{% load staticfiles %}
+
+
+{% block form_content %}
+
+    <p>Please enter the general settings of the poll</p>
+
+    <div class="form-group">
+        <label class="control-label" for="id_0-poll_name">Name of the poll</label>
+        <input type="text" class="form-control" id="id_0-poll_name" name="0-poll_name" placeholder="Enter the name"
+                {% if form.poll_name.value %}
+               value="{{ form.poll_name.value }}"
+                {% endif %}>
+        {% if form.poll_name.errors %}{{ form.poll_name.errors }}{% endif %}
+    </div>
+    <div class="form-group">
+        <label class="control-label" for="id_0-poll_question">Question of the poll</label>
+        <input type="text" class="form-control" id="id_0-poll_question" name="0-poll_question" placeholder="Enter the question"
+                {% if form.poll_question.value %}
+               value="{{ form.poll_question.value }}"
+                {% endif %}>
+        {% if form.poll_question.errors %}{{ form.poll_question.errors }}{% endif %}
+    </div>
+    <div class="form-group">
+        <label class="control-label" for="id_0-poll_description">Description</label>
+        <textarea class="form-control" rows="3" id="id_0-poll_description" name="0-poll_description" placeholder="Optional description of the poll">{% if form.poll_description.value %}{{ form.poll_description.value }}{% endif %}</textarea>
+        {% if form.poll_description.errors %}{{ form.poll_description.errors }}{% endif %}
+    </div>
+
+    <div class="form-group">
+        <label>Visibility of the poll:</label>
+        {% if form.poll_private.errors %}{{ form.poll_private.errors }}{% endif %}
+
+        <div class="checkbox">
+            <input type="checkbox" id="id_0-poll_private" name="0-poll_private"
+                   data-size="small" data-on-text="&nbsp;Private&nbsp;" data-off-text="&nbsp;Public&nbsp;"
+                    {% if form.poll_private.value %}
+                   checked="{{ form.poll_private.value }}"
+                    {% endif %}>
+            <label id="id_0-label-poll_private" for="id_0-poll_private">&nbsp; Only <strong>registered voters</strong> can participate</label>
+            <label id="id_0-label-poll_public" for="id_0-poll_private"><strong>&nbsp; Everyone</strong> can vote</label>
+        </div>
+    </div>
+    <div class="form-group to-hide-private">
+        <div class="checkbox">
+                <input type="checkbox" id="id_0-poll_change_vote" name="0-poll_change_vote"
+                       data-size="small" data-on-text="Yes" data-off-text="No"
+                        {% if form.poll_change_vote.value %}
+                       checked="{{ form.poll_change_vote.value }}"
+                        {% endif %}>
+            <label for ='id_0-poll_change_vote'>&nbsp; The voters can change their votes</label>
+        </div>
+    </div>
+    <div class="form-group">
+        <div class="checkbox">
+                <input type="checkbox" id="id_0-poll_temporary_result" name="0-poll_temporary_result"
+                       data-size="small" data-on-text="Yes" data-off-text="No"
+                        {% if form.poll_temporary_result.value %}
+                       checked="{{ form.poll_temporary_result.value }}"
+                        {% endif %}>
+                <label for="id_0-poll_temporary_result">&nbsp; The voters can see the temporary results</label>
+        </div>
+    </div>
+    <label class="control-label" for="id_0-opening_date">Timeframe of the poll</label>
+    <div class="input-group col-md-6"> <span class="input-group-addon">Opening date</span>
+        <input type="datetime"  id="id_0-opening_date" name="0-opening_date" class="form-control"
+               value = "{{ form.opening_date.value  }}">
+    </div>
+    {% if form.opening_date.errors %}{{ form.opening_date.errors }}{% endif %}
+    <br>
+    <div class="input-group col-md-6"> <span class="input-group-addon">Closing date &nbsp;</span>
+        <input type="datetime" id="id_0-closing_date" name="0-closing_date" class="form-control"
+               value = "{{ form.closing_date.value  }}">
+        {% if form.closing_date.errors %}{{ form.closing_date.errors }}{% endif %}
+    </div>
+    <br>
+    <div class="form-group">
+        <label>Periodic poll</label>
+        {% if form.recursive_period.errors %}{{ form.recursive_period.errors }}{% endif %}
+
+
+        <div class="checkbox">
+            <input type="checkbox" id="id_0-recursive_poll" name="0-recursive_poll"
+                   data-size="small" data-on-text="&nbsp;Periodic&nbsp;" data-off-text="&nbsp;Unique&nbsp;"
+                    {% if form.recursive_poll.value %}
+                   checked="{{ form.recursive_poll.value }}"
+                    {% endif %}>
+            <label id="id_0-label-recursive_poll" for="id_0-recursive_poll">&nbsp; The poll is run <strong>periodically</strong></label>
+            <label id="id_0-label-unique_poll" for="id_0-recursive_poll">&nbsp; The poll is run <strong>only once</strong></label>
+        </div>
+    </div>
+    <div class="form-group to-hide-recursive-poll">
+        <div class="input-group col-md-6" >
+            <span class="input-group-addon">Period in day(s)</span>
+            <input type="datetime" id="id_0-recursive_period" name="0-recursive_period" class="form-control"
+                    {% if form.recursive_period.value %}
+                   value = "{{ form.recursive_period.value  }}"
+                    {% endif %}>
+        </div>
+        <p class="help-block">If the period is 3 days, the timeframe of the poll will be repeated every 3 days.
+            By default the votes are conserved from one iteration to another</p>
+    </div>
+
+
+{% endblock %}
+
+{% block js_block %}
+    <script type="text/javascript">
+
+        $(function(){
+            //init change_vote switch
+            $("#id_0-poll_change_vote").bootstrapSwitch();
+
+            //init poll_temporary_result switch
+            $("#id_0-poll_temporary_result").bootstrapSwitch();
+
+            //init recursive_poll switch
+            $("#id_0-recursive_poll").bootstrapSwitch();
+            if ($('#id_0-recursive_poll').is(':checked')){
+                $('.to-hide-recursive-poll').show();
+                $('#id_0-label-recursive_poll').show();
+                $('#id_0-label-unique_poll').hide();
+            }
+            else{
+                $('.to-hide-recursive-poll').hide();
+                $('#id_0-label-recursive_poll').hide();
+                $('#id_0-label-unique_poll').show();
+            }
+
+            //init private-poll switch
+            $("#id_0-poll_private").bootstrapSwitch();
+            if ($('#id_0-poll_private').is(':checked')){
+                $('.to-hide-private').show();
+                $('#id_0-label-poll_private').show();
+                $('#id_0-label-poll_public').hide();
+            }
+            else{
+                $('.to-hide-private').hide();
+                $('#id_0-label-poll_private').hide();
+                $('#id_0-label-poll_public').show();
+            }
+
+              //show or hide the text area on click
+            $('#id_0-recursive_poll').on('switchChange.bootstrapSwitch', function(event, state) {
+                if (state == true){
+                    $('.to-hide-recursive-poll').show();
+                    $('#id_0-label-recursive_poll').show();
+                    $('#id_0-label-unique_poll').hide();
+                } else{
+                    $('#id_0-recursive_period').prop("value", null);
+                    $('.to-hide-recursive-poll').hide();
+                    $('#id_0-label-recursive_poll').hide();
+                    $('#id_0-label-unique_poll').show();
+                }
+            });
+
+            //show or hide change vote switch based on visibility
+            $('#id_0-poll_private').on('switchChange.bootstrapSwitch', function(event, state) {
+                if (state == true){
+                    $('.to-hide-private').show();
+                    $('#id_0-label-poll_private').show();
+                    $('#id_0-label-poll_public').hide();
+                }
+                else{
+                    $('#id_0-poll_change_vote').bootstrapSwitch('state', false , true);
+                    $('#id_0-poll_change_vote').prop("checked", false);
+                    $('.to-hide-private').hide();
+                    $('#id_0-label-poll_private').hide();
+                    $('#id_0-label-poll_public').show();
+                }
+            });
+        });
+    </script>
+{% endblock %}

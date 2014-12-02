@@ -1,0 +1,36 @@
+{% extends "base/base.html" %}
+{% load staticfiles %}
+
+{% block content %}
+    <div class = "container">
+        <h1>Send an email to the participants</h1>
+        <div class="jumbotron">
+            <div class="col-md-offset-1">
+                <form method="post" role = "form">
+                    {% csrf_token %}
+                    {% if form.non_field_errors %}
+                        <div class="form-group">
+                            <p><strong>{{ form.non_field_errors }}</strong></p>
+                        </div>
+                    {% endif %}
+                    <div class="form-group">
+                        <label class="control-label" for="id-subject">Subject:</label>
+                        <input type="text" class="form-control" id="id-subject"
+                               name="subject"
+                                {% if form.message.value %}
+                               value= "{{ form.subject.value }}"
+                                {% endif %}>
+                        {% if form.subject.errors %}<p><strong>{{ form.subject.errors }}</strong></p>{% endif %}
+                    </div>
+                    <div class="form-group">
+                        <label class="control-label" for="id-message">Message:</label>
+                        {% if form.participant.errors %}{{ form.participant.errors }}{% endif %}
+                        <textarea class="form-control" rows="10" id="id-message" name="message" >{% if form.message.value %}{{ form.message.value }}{% endif %}</textarea>
+                    </div>
+                    <div class="form-group">
+                        <input type="submit" class="btn btn-default pull-right" value="Send">
+                    </div>
+                </form>
+            </div>
+        </div>
+{% endblock %}

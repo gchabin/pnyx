@@ -1,0 +1,37 @@
+{% extends "base/base.html" %}
+{% load staticfiles %}
+
+
+
+{% block content %}
+    <div class = "container">
+        <div class="jumbotron">
+            <div class="col-md-offset-1">
+                <h1>Thank you, the poll has been created</h1>
+                {% if private %}
+                    <p> The links have been sent to the voters</p>
+                {% else %}
+                    <p id="text_to_copy">{{ protocol }}://{{ domain }}{%  url 'vote:get_ballot_view' pk 'public' %} </p>
+                    <p> Here is the link to vote:
+                        <a type="button" class="navbar-link" href="{%  url 'vote:get_ballot_view' pk 'public' %}">link</a>
+                        , or <a id = "copy_button" type="button" class="navbar-link" >Copy to Clipboard</a>
+                    </p>
+                {%  endif %}
+                <a type="button" class="btn btn-primary pull-right" href="{%  url 'polls:manage_poll' %}">Manage existing polls</a>
+            </div>
+        </div>
+    </div>
+{%  endblock %}
+{% block js_block %}
+    <script type="text/javascript" src="{% static 'jquery/js/jquery.zclip.min.js' %}"></script>
+    <script>
+        $(document).ready(function(){
+            $(document.getElementById('copy_button')).zclip({
+                path:"{% static 'jquery/js/ZeroClipboard.swf' %}",
+                copy: document.getElementById('text_to_copy').textContent
+            });
+            // The link with ID "copy-description" will copy
+            // the text of the paragraph with ID "description"
+        });
+    </script>
+{% endblock %}

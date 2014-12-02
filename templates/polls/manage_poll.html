@@ -1,0 +1,96 @@
+{% extends "base/base.html" %}
+{% load staticfiles %}
+
+{% block content %}
+    <div class="container">
+        <div class="container">
+            <div class="col-md-12">
+                <h1>Manage your polls<br></h1>
+                <h3 class="text-muted">The running polls, the upcoming and the closed ones.</h3>
+            </div>
+        </div>
+        {% if current_poll_list or upcoming_poll_list or closed_poll_list%}
+            {% if current_poll_list %}
+                <div class="container">
+                    <h2>Current polls</h2>
+                    <div class="jumbotron">
+                        <div class="row">
+                            {% for poll in current_poll_list %}
+                                <div class="col-md-4">
+                                    <div class="thumbnail">
+                                        <a class="navbar-link" href={%  url "polls:detail" poll.pk %} role="button"><h3>{{ poll.name|truncatechars:20 }}</h3></a>
+                                        <p>{{ poll.question|truncatechars:30}}</p>
+                                        <div class="progress">
+                                            <div class="progress">
+                                                <div class="progress-bar progress-bar-warning" role="progressbar" aria-valuenow={{ poll.get_progress }} aria-valuemin="0" aria-valuemax="100" style="width: {{ poll.get_progress }}%">
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="btn-group-xs">
+                                            <a class="btn btn-link" href="{%  url "polls:detail" poll.pk %}" role="button"> Details</a>
+                                            <a class="btn btn-link" href="{% url 'polls:setup' poll.pk %}" role="button"> Settings</a>
+                                            <a class="btn btn-link" href="{% url 'vote:temp_results' poll.pk 'admin' %}">Temporary results</a>
+                                        </div>
+                                    </div>
+                                </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+            {% endif %}
+            {% if upcoming_poll_list %}
+                <div class="container">
+                    <h2>Upcoming polls</h2>
+                    <div class="jumbotron">
+                        <div class="row">
+                            {% for poll in upcoming_poll_list %}
+                                <div class="col-md-4">
+                                    <div class="thumbnail">
+                                        <a class="navbar-link" href={%  url "polls:detail" poll.pk %} role="button"><h3>{{ poll.name|truncatechars:20}}</h3></a>
+                                        <p>{{ poll.question|truncatechars:30 }}</p>
+                                        <p>Open: {{ poll.opening_date|date:"d/m/Y" }}, {{ poll.opening_date|time:"H:i" }}</p>
+                                        <div class="btn-group-xs">
+                                            <a class="btn btn-link" href="{%  url "polls:detail" poll.pk %}" role="button"> Details</a>
+                                            <a class="btn btn-link" href="{% url 'polls:setup' poll.pk %}" role="button"> Settings</a>
+                                            <a class="btn btn-link" href="{% url 'polls:email_participant' poll.pk %}" role="button">Email participants</a>
+                                        </div>
+                                    </div>
+                                </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+            {% endif %}
+            {% if closed_poll_list %}
+                <div class="container">
+                    <h2>Closed polls</h2>
+                    <div class="jumbotron">
+                        <div class="row">
+                            {% for poll in closed_poll_list %}
+                                <div class="col-md-4">
+                                    <div class="thumbnail">
+                                        <a class="navbar-link" href={%  url "polls:detail" poll.pk %} role="button"><h3>{{ poll.name|truncatechars:20}}</h3></a>
+                                        <p>{{ poll.question|truncatechars:30 }}</p>
+                                        <p>closed since: {{ poll.closing_date|date:"d/m/Y" }}, {{ poll.closing_date|time:"H:i" }}
+
+                                        </p>
+                                        <div class="btn-group-xs">
+                                            <a class="btn btn-link" href="{%  url "polls:detail" poll.pk %}" role="button"> Details</a>
+                                            <a class="btn btn-link" href="{% url 'polls:setup' poll.pk %}" role="button"> Settings</a>
+                                            <a class="btn btn-link" href="{% url 'vote:results' poll.pk 'admin'%}">Results</a>
+                                        </div>
+                                    </div>
+                                </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+            {% endif %}
+        {% else %}
+            <div class="container">
+                <h3>No poll created</h3>
+                <a class="btn btn-default" href="{% url 'polls:create_poll'%}" role="button"> Create a poll</a>
+            </div>
+        {% endif %}
+    </div>
+{%  endblock %}

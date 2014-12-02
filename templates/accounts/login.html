@@ -1,0 +1,126 @@
+{% extends "base/base_signin.html" %}
+
+{% load staticfiles %}
+{% load static %}
+
+{% block carousel %}
+    <div id="myCarousel" class="carousel slide" data-ride="carousel">
+        <!-- Indicators -->
+        <!--
+        <ol class="carousel-indicators">
+            <li data-target="#myCarousel" data-slide-to="0" class="active"></li>
+            <li data-target="#myCarousel" data-slide-to="1"></li>
+            <li data-target="#myCarousel" data-slide-to="2"></li>
+        </ol>
+        <div class="carousel-inner">
+            <div class="item active">
+                <img class='img-responsive' src= "{% static 'pnyx/images/slide.png' %}" " alt="First slide">
+                <div class="container">
+                    <div class="carousel-caption">
+                        <h1>A user-friendly preference aggregation tool</h1>
+                        <p>Pnyx is a web-based application that allows you to aggregate preferences in a very intuitive way. Create your poll, invite participants and aggregate their preferences.</p>
+                        <p><a class="btn btn-primary" href="{% url 'register' %}" role="button">Sign up today</a></p>
+                    </div>
+                </div>
+            </div>
+            <div class="item">
+                <img class='img-responsive' src= "{% static 'pnyx/images/slide.png' %}" alt="Second slide">
+                <div class="container">
+                    <div class="carousel-caption">
+                        <h1>A well-suited poll in every situation</h1>
+                        <p>Pnyx supports 5 different preference types and 3 different representations of the aggregation.
+                        Every poll extracts the real collective preference as much as possible. </p>
+                        <p><a class="btn btn-primary" href="{% url 'about' %}#input" role="button">Learn more about Pnyx</a></p>
+                    </div>
+                </div>
+            </div>
+            <div class="item">
+                <img class='img-responsive' src= "{% static 'pnyx/images/slide.png' %}" alt="Third slide">
+                <div class="container">
+                    <div class="carousel-caption">
+                        <h1>A scientific approach</h1>
+                        <p>Pnyx is based on the social choice theory. The choice rules aggregating the preferences have been selected based on scientific works to provide the  most relevant methods and to make Pnyx a powerful toll.
+                        <p><a class="btn btn-primary" href="{% url 'about' %}#choice_rules" role="button">Learn more about the choice rules</a></p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <a class="left carousel-control" href="#myCarousel" data-slide="prev"><span class="glyphicon glyphicon-chevron-left"></span></a>
+        <a class="right carousel-control" href="#myCarousel" data-slide="next"><span class="glyphicon glyphicon-chevron-right"></span></a>
+    </div>
+    -->
+{%  endblock %}
+
+{% block content %}
+    <div class="container">
+    <!-- START THE FEATURETTES -->
+        <div class="row featurette">
+            <div class="col-md-12">
+                <img class='img-responsive' src= "{% static 'pnyx/images/slide.png' %}" alt="Second slide">
+            </div>
+        </div>
+        <div class="row featurette">
+            <div class="col-md-7">
+                <h2 class="featurette-heading">An easy to use <span class="text-muted">aggregation tool</span></h2>
+                <p class ="lead">Pnyx is a web-based application that allows you to collect preferences of people around you and to aggregate them.
+                    Unlike what other existing solutions offer, Pnyx aims to be easy to use and to optimize the user experience.
+                    Pnyx provides a user-friendly interface in which you can easily create polls, manage them, or even contact the participants.</p>
+                <p class ="lead">Signup to create your first poll, the voters will not require any account and Pnyx provides an intuitive voting interface</p>
+                <p><a href="{% url 'register' %}" class="btn btn-primary pull-right" role="button">Create an account</a></p>
+            </div>
+            <div class = "col-md-4 col-md-offset-1">
+                {% if form.errors %}
+                    <p>Your username and password didn't match. Please try again.</p>
+                {% endif %}
+
+                <form class="form-signin" role="form" method="post" action="{% url 'login' %}">
+                    {% csrf_token %}
+                    <h2 class="featurette-heading">Please sign in</h2>
+                    <br>
+                    <input id="id_username" class="form-control" maxlength="254" placeholder="Username" name="username" type="text" required autofocus/>
+                    <input id="id_password" class="form-control" name="password" type="password" placeholder="Password" required/>
+                    <button class="btn btn-primary btn-block" type="submit">Sign in</button>
+                    <a href="{% url 'password_reset' %}" class="btn btn-link pull-right" role="button">Forgot your password?</a>
+                </form>
+            </div>
+        </div>
+
+        <hr class="featurette-divider">
+
+        <div class="row featurette">
+            <div class="col-md-3">
+                <img class="featurette-image img-responsive" src= "{% static 'pnyx/images/sewing.png' %}" alt="">
+            </div>
+            <div class="col-md-9">
+                <h2 class="featurette-heading">A well-suited poll <span class="text-muted">in every situation</span></h2>
+                <p class="lead">It is important that the preference aggregation suits as much as possible to the need of the poll creator.
+                    Therefore Pnyx allows you to fully customize your poll.
+                    You can especially chose the type of preference asked to the voters or the output of the aggregation.</p>
+                <p class ="lead">Voters can either specify a unique most preferred alternative,
+                   dichotomous preferences, a linear order of preferences,
+                   a complete preorder or a complete binary relation.
+                   Pnyx can compute the best alternative, a lottery or rankings representating the collective preference</p>
+                <p><a href="{% url 'about' %}#poll" class="btn btn-primary pull-right" role="button">Learn more about Pnyx</a></p>
+            </div>
+        </div>
+
+        <hr class="featurette-divider">
+
+        <div class="row featurette">
+            <div class="col-md-9">
+                <h2 class="featurette-heading">Powerful <span class="text-muted">aggregation tool</span></h2>
+                <p class="lead">Pnyx is not only a user friendly application but also a powerful aggregation tool.
+                    To design Pnyx, we adopted a scientific approach based on the social choice theory.
+                    Thus we selected the choice rules aggregating the preferences to provide a meaningful method for every combination of input and output types.</p>
+                <p><a href="{% url 'about' %}#choice_rules" class="btn btn-primary pull-right" role="button">Learn more about the choice rules</a></p>
+            </div>
+            <div class="col-md-3">
+                <img class="featurette-image img-responsive" src= "{% static 'pnyx/images/powerful.png' %}"  alt="">
+            </div>
+        </div>
+
+
+        <!-- /END THE FEATURETTES -->
+
+    </div>
+{% endblock %}

@@ -1,0 +1,307 @@
+{% extends "base/base.html" %}
+{% load staticfiles %}
+{% block content %}
+    <div class = "container">
+    <a name="poll"></a>
+    <div class="jumbotron">
+        <div class="col-md-offset-1">
+            <h1>More information about Pnyx</h1>
+        </div>
+    </div>
+    <div class="row featurette">
+        <h1 class="featurette-heading text-muted">Overview</h1>
+    </div>
+    <p class ="lead">
+		Pnyx is a user-friendly and yet powerful application that supports the whole process of collective decision making (from setting up a poll/election to eliciting individual preferences to aggregating them in a reasonable way to the communication of outcomes to participants). Pnyx takes into account the insights that have been generated in social choice theory (including new insights regarding probabilistic methods) and does so in a highly user-friendly way without expecting knowledge about the properties of the underlying mechanisms.
+    </p>	
+    <div class="row featurette">
+        <h1 class="featurette-heading text-muted">The features of a poll</h1>
+    </div>
+    <p class ="lead">
+        Pnyx polls have several functional features to suit a variety of different use case scenarios while not overwhelming the user with a large amount of customization options.
+    </p>
+    <div class="row featurette">
+        <div class="col-md-12">
+            <h2 class="featurette-heading text-muted">Naming and description</h2>
+            <p class ="lead"><span class=" h3 featurette-heading">Name: </span>
+                The name of the poll. It is used mostly for poll management purposes.
+            </p>
+            <p class ="lead"><span class=" h3 featurette-heading">Question: </span>
+                The main question to be resolved with the poll. It is visible on the ballot.
+            </p>
+            <p class ="lead"><span class=" h3 featurette-heading">Description: </span>
+                A description of the poll. It is visible on the ballot.
+            </p>
+        </div>
+    </div>
+    <div class="row featurette">
+        <div class="col-md-12">
+            <h2 class="featurette-heading text-muted">Visibility</h2>
+            <p class ="lead"><span class=" h3 featurette-heading">Public poll: </span>
+                The poll is visible to anyone with knowledge of its unique URL. Any visitor can vote and see the results.
+            </p>
+            <p class ="lead"><span class=" h3 featurette-heading">Private poll: </span>
+                The poll is visible only to invited participants. Each participant receives a unique link for his own ballot and can only cast one vote. In addition to invited participants the poll admin can see the results, too.
+            </p>
+            <p class ="lead"><span class=" h3 featurette-heading">Change vote: </span>
+                For private polls this attribute allows the participants to change their votes before the closing time of the poll. By default each participant can cast his vote only once.
+            </p>
+            <p class="lead"><span class=" h3 featurette-heading">Temporary results: </span>
+                If enabled, it allows all participants to see temporary results at any time (even before the poll ends).
+            </p>
+        </div>
+    </div>
+    <div class="row featurette">
+        <div class="col-md-12">
+            <h2 class="featurette-heading text-muted">Timeframe</h2>
+            <p class ="lead"><span class=" h3 featurette-heading">Opening time: </span>
+                The opening time of the poll. No one will be able to cast a vote before this time.
+            </p>
+            <p class ="lead"><span class=" h3 featurette-heading">Closing time: </span>
+                The closing time of the poll. No one will be able to cast a vote after this time. The final results are accessible only after this time has passed.
+            </p>
+            <p class ="lead"><span class=" h3 featurette-heading">Periodic poll: </span>
+                If set, the poll will be re-run regularly without the need to explicitly recreate it. Unless participants change their votes, their previous votes will be considered as still valid. Therefore, this feature mostly makes sense for private polls where the voters can change their votes.
+            </p>
+            <p class ="lead"><span class=" h3 featurette-heading">Period: </span>
+            	Periodicity of the poll.  If the period of the poll is set to <em>x</em> days, the poll will be repeated every <em>x</em> days.
+            </p>
+        </div>
+    </div>
+    <div class="row featurette">
+        <div class="col-md-12">
+            <h2 class="featurette-heading text-muted">Input and output</h2>
+            <p class ="lead">Pnyx supports a range of different preferences to be elicited from the voters as well as different output formats (see the full <a class="navbar-link" href="#input">descriptions</a> for more details). Based on these choices a suitable aggregation method will be chosen by Pnyx (see the <a class="navbar-link" href="#choice_rules">aggregation rules</a>).
+            </p>
+        </div>
+    </div>
+    <div class="row featurette">
+        <div class="col-md-12">
+            <h2 class="featurette-heading text-muted">Alternatives</h2>
+            <p class ="lead"><span class=" h3 featurette-heading">Alternative: </span>Each poll has to specify a set of feasible alternatives. Each alternative is specified by its name and an optional description.
+            </p>
+            <p class ="lead"><span class=" h3 featurette-heading">Tie breaking rule: </span>If required, tie breaking is performed by pnyx according to a specified order over the alternatives. It can be defined randomly or manually by the poll creator. This tie breaking is used for every choice rule except Nash's rule, Maximal lotteries and Kemeny's rule. For Nash's rule and Kemeny's rule the tie breaking is performed during the computation by the LP solver. For maximal lotteries, the barycenter of the space of all maximal lotteries is approximated.</p>
+        </div>
+    </div>
+    <div class="row featurette">
+        <div class="col-md-12">
+            <h2 class="featurette-heading text-muted">Participants</h2>
+            <p class ="lead">
+                For private polls, each participant is invited by an email from the Pnyx system. For public polls, this is optional (alternatively the poll creator can share the public link to the poll). Pnyx furthermore provides a built-in interface for the poll admin to send emails to all participants at any time.
+            </p>
+            <h3> The email addresses entered will not be shared with third parties or otherwise be used for commercial purposes.<h3>
+        </div>
+    </div>
+    <hr id = "input" class="featurette-divider">
+    <div class="row featurette">
+        <h1 class="featurette-heading text-muted">Input types (individual preferences)</h1>
+    </div>
+    <div class="row featurette">
+        <div class="col-md-2">
+            <img class='img-responsive' class='img-responsive' class="thumbnail" src= "{% static 'polls/images/input_most_pref.png' %}" height="150 " width="150" alt="">
+        </div>
+        <div class="col-md-9">
+            <p class ="lead"><span class=" h3 featurette-heading">Most preferred alternative: </span>
+                The voter can only select a unique alternative among all candidates. 
+				This is how in practice elections are often carried out.
+            </p>
+        </div>
+    </div>
+    <div class="row featurette">
+        <div class="col-md-2">
+            <img class='img-responsive' class='img-responsive' class="thumbnail" src= "{% static 'polls/images/input_dicot.png' %}" height="150 " width="150" alt="">
+        </div>
+        <div class="col-md-9">
+            <p class ="lead"><span class=" h3 featurette-heading">Approved alternatives: </span>
+                The voter may approve a <em>set</em> of alternatives among the candidates. 
+				The technical term are dichotomous preferences. There is no distinction between alternatives within the set of approved or non-approved alternatives, respectively.
+            </p>
+        </div>
+    </div>
+    <div class="row featurette">
+        <div class="col-md-2">
+            <img class='img-responsive' class='img-responsive' class="thumbnail" class="thumbnail" src= "{% static 'polls/images/input_borda.png' %}" height="150 " width="150" alt="">
+        </div>
+        <div class="col-md-9">
+            <p class ="lead"><span class=" h3 featurette-heading">Rankings without ties: </span>
+                Each voter has to rank all alternatives and the ballot may not contain ties between alternatives.
+				Such preferences are also called linear.
+            </p>
+        </div>
+    </div>
+    <div class="row featurette">
+        <div class="col-md-2">
+            <img class='img-responsive' class='img-responsive' class="thumbnail" src= "{% static 'polls/images/input_partial_borda.png' %}" height="150 " width="150" alt="">
+        </div>
+        <div class="col-md-9">
+            <p class ="lead"><span class=" h3 featurette-heading">Rankings with ties: </span>
+                This input format is a generalization of "rankings without ties" where now ties between alternatives are allowed.
+                One speaks of complete preorders or bucket preferences.
+            </p>
+        </div>
+    </div>
+    <div class="row featurette">
+        <div class="col-md-2">
+            <img class='img-responsive' class='img-responsive' class="thumbnail" src= "{% static 'polls/images/input_complete.png' %}" height="150 " width="150" alt="">
+        </div>
+        <div class="col-md-9">
+            <p class ="lead"><span class=" h3 featurette-heading">Pairwise comparisons: </span>
+                This is the most general form of preferences that are supported by Pnyx. The voter may specify each individual pairwise comparison among alternatives.
+                By default, indifference between any pair is assumed. Note that transitivity of the preferences is no longer required.
+            </p>
+        </div>
+    </div>
+    <hr id = "output" class="featurette-divider">
+    <h1 class="featurette-heading text-muted">Output types (collective preferences)</h1>
+    <div class="row featurette">
+        <div class="col-md-12">
+            <p class ="lead"><span class=" h3 featurette-heading">Unique winner: </span>
+                The result of the poll is a unique best alternative.
+            </p>
+        </div>
+    </div>
+    <div class="row featurette">
+        <div class="col-md-12">
+            <p class ="lead"><span class=" h3 featurette-heading">Lottery: </span>
+                The result of the poll is represented by a probability distribution over the alternatives. 
+				This output format allows for particularly nice aggregation rules with good theoretical properties. 
+                Note that it is also a suitable format when a divisible resource should be allocated/shared (e.g., a meeting room), where then the probabilities stand for shares of the resource.
+            </p>
+        </div>
+    </div>
+    <div class="row featurette">
+        <div class="col-md-12">
+            <p class ="lead"><span class=" h3 featurette-heading"> Rankings without ties: </span>
+                The collective preferences are provided by a complete ranking of all alternative without ties. 
+				This can also be interpreted as a collective order of preference over the alternatives. 
+        </div>
+    </div>
+    <div class="row featurette">
+        <div class="col-md-3 col-md-offset-2">
+            <img class='img-responsive' class='img-responsive' class="thumbnail" src= "{% static 'polls/images/output_alternative.png' %}" height="150 " width="150" alt="">
+        </div>
+        <div class="col-md-3">
+            <img class='img-responsive' class='img-responsive' class="thumbnail" src= "{% static 'polls/images/output_lottery.png' %}" height="150 " width="150" alt="">
+        </div>
+        <div class="col-md-3">
+            <img class='img-responsive' class='img-responsive' class="thumbnail" class="thumbnail" src= "{% static 'polls/images/output_ranking.png' %}" height="150 " width="150" alt="">
+        </div>
+    </div>
+    <hr id = "choice_rules" class="featurette-divider">
+    <h1 class="featurette-heading text-muted">Aggregation rules:</h1>
+    <div class="row featurette">
+        <div class="col-md-12">
+            <p class ="lead">
+                After successful collection of the preferences of all voters, those preferences are aggregated into a single collective preference of the group.
+                For this an aggregation rule depending on the desired input &amp; output types is applied.
+            </p>
+            <p class ="lead">
+                The Pnyx project aims to keep things simple for the user, why the aggregation rules to be used have been preselected based on scientific insights.
+            </p>
+            <p class ="lead">
+                The following table gives an overview of the implemented aggregation rules and for which combination of input and output which rule is applied.</p>
+            <br>
+        </div>
+    </div>
+    <div class="row featurette">
+        <div class="col-md-10 col-md-offset-1">
+            <table class="table table-hover lead">
+                <tr>
+                    <th></th>
+                    <th>Most preferred alternative</th>
+                    <th>Approved alternatives</th>
+                    <th>Linear rankins</th>
+                    <th>Rankings with ties</th>
+                    <th>Pairwise comparisons</th>
+                </tr>
+                <tr>
+                    <th>Unique winner</th>
+                    <td>Plurality rule</td>
+                    <td>Approval voting</td>
+                    <td>Borda's rule</td>
+                    <td>Bucket Borda's rule</td>
+                    <td>Young's generalization of Borda's rule</td>
+                </tr>
+                <tr>
+                    <th>Lottery</th>
+                    <td>Random dictatorship</td>
+                    <td>Nash's rule</td>
+                    <td>Maximal lotteries</td>
+                    <td>Maximal lotteries</td>
+                    <td>Maximal lotteries</td>
+                </tr>
+                <tr>
+                    <th>Ranking without ties</th>
+                    <td>Plurality scores</td>
+                    <td>Approval voting scores</td>
+                    <td>Kemeny's rule</td>
+                    <td>Kemeny's rule</td>
+                    <td>Kemeny's rule</td>
+                </tr>
+            </table>
+        </div>
+    </div>
+    <div class="row featurette">
+        <div class="col-md-12">
+            <br>
+            <p class ="lead"><span class=" h3 featurette-heading">Plurality rule: </span>
+                In this voting system the winner is the alternative with the most votes (recall that each voter may only vote for a single alternative); there is no requirement that the winner gains an absolute majority of votes. 
+            </p>
+            <p class ="lead"><span class=" h3 featurette-heading">Approval voting: </span>
+                Each voter may "approve" (i.e., select) as many alternatives as desired. The winner is the alternatives with most approval votes.
+            </p>
+            <p class ="lead"><span class=" h3 featurette-heading">Borda's rule: </span>
+                Borda's rule is a scoring rule where each alternative receives from 0 to <em>m</em> - 1 points from each voter (depending on the position the alternative is ranked in), where <em>m</em> is the total number of alternatives. The alternative with the highest cumulative score is selected.
+            </p>
+            <p class ="lead"><span class=" h3 featurette-heading">Bucket Borda's rule: </span>
+                Bucket Borda's rule is an extension of Borda's rule allowing for ties in voters' preferences. Among a set of tied alternatives each alternative receives the average score of all possible orderings of those alternatives. In total each voter still gets to assign the same number of points (regardless of how many ties he specifies).
+            </p>
+            <p class ="lead"><span class=" h3 featurette-heading">Young's generalization of Borda's rule: </span>
+                This rule generalizes both Borda's as well as Bucket Borda's rule and only requires pairwise comparisons of alternatives. 
+                For each voter, each alternative receives 1 point for every alternative it dominates and loses 1 point for each alternative which it is dominated by.
+            </p>
+            <p class ="lead"><span class=" h3 featurette-heading">Random dictatorship: </span>
+                This lottery corresponds to selecting a single voter at random and letting him choose among the alternatives. It has the nice property that "each vote counts".
+            </p>
+            <p class ="lead"><span class=" h3 featurette-heading">Nash's rule: </span>
+                Nash's rule maximizes a convex collective utility function and guarantees to every non-indifferent voter a lower bound of satisfaction. For more details please refer to <a type="button" class="navbar-link"
+                   href="http://www.ruf.rice.edu/~econ/papers/2003papers/09bogomolnaia.pdf">
+                    A. Bogomolnaia, H. Moulin, and R. Stong. Collective choice under dichotomous preferences. Journal of Economic Theory, 122(2):165–184, 2005.</a>
+            </p>
+            <p class ="lead"><span class=" h3 featurette-heading">Maximal lotteries: </span> 
+				Maximal lotteries are an advanced aggregation method equivalent to mixed maximin strategies of the symmetric zero-sum game given by the pairwise majority margins. Whenever there is an alternative that is preferred to any other alternative by some majority of voters (a so-called Condorcet winner), the lottery that assigns probability one to this alternative is a maximal lottery. This is in contrast to random dictatorship, which only returns a lottery with support one if all voters unanimously favor the same alternative. At the same time, maximal lotteries satisfy consistency with respect to variable electorates which has been identified as the defining property of Borda’s scoring rule.
+                For more detail please refer to 
+                <a type="button" class="navbar-link"
+                   href="http://dss.in.tum.de/files/brandt-research/stratlott.pdf">
+                   H. Aziz, F. Brandt, and M. Brill. On the tradeoff between economic efficiency and strategyproofness in randomized social choice. In Proceedings of the 12th International Conference on Autonomous Agents and Multi-Agent Systems (AAMAS), pages 455–462. IFAAMAS, 2013.
+                </a>
+            </p>
+            <p class ="lead"><span class=" h3 featurette-heading">Plurality scores: </span>
+                This rule yields a linear ranking based on plurality scores (see above).
+            </p>
+            <p class ="lead"><span class=" h3 featurette-heading">Approval voting scores: </span>
+                This rule yields a linear ranking based on approval scores (see above).
+            </p>
+            <p class ="lead"><span class=" h3 featurette-heading">Kemeny's rule: </span>
+                This rule yields a linear ranking that agrees with as many voters' pairwise preferences as possible.
+            </p>
+        </div>
+    </div>
+    <hr id = "team" class="featurette-divider">
+    <div class="row featurette">
+        <h1 class="featurette-heading text-muted">About us:</h1>
+    </div>
+    <div class="row featurette">
+        <div class="col-md-12">
+            <p class ="lead">
+                This project is run by the chair of <a type="button" class="navbar-link" href="http://dss.in.tum.de/">Decision Sciences &amp; Systems</a> at <a type="button" class="navbar-link" href="http://www.tum.de/">Technische Universität München</a>:
+            </p>
+            <ul class="list-unstyled lead">
+                <li><a type="button" class="navbar-link" href="http://dss.in.tum.de/staff/brandt.html">Prof. Dr. Felix Brandt</a> (<a type="button" class="navbar-link" href="http://www.tum.de/">TUM</a>)</li>
+                <li><a type="button" class="navbar-link" href="http://dss.in.tum.de/staff/christian-geist.html">Christian Geist, M.Sc.</a> (<a type="button" class="navbar-link" href="http://www.tum.de/">TUM</a>)</li>
+                <li>Guillaume Chabin (<a type="button" class="navbar-link" href="http://www.tum.de/">TUM</a> &amp; <a type="button" class="navbar-link" href="http://www.telecom-paristech.fr/eng">Telecom ParisTech</a>)</li>
+            </ul>
+            <!-- <a class="btn btn-default btn-lg pull-right" href="mailto:pnyx.test@gmail.com">Contact us</a> -->
+        </div>
+    </div>
+{%  endblock %}

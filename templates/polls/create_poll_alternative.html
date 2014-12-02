@@ -1,0 +1,80 @@
+{% extends "polls/wizard_create_poll.html" %}
+{% load staticfiles %}
+
+
+{% block form_content %}
+
+    <p>Please specify the alternatives</p>
+    <p class="help-block">One alternative per line, with the following pattern: Name  -- Description (optional) </p>
+
+    <div class="form-group">
+        <label class="control-label" for="id_3-alternative">Alternatives</label>
+        {% if form.alternative.errors %}{{ form.alternative.errors }}{% endif %}
+        <textarea class="form-control" rows="5" id="id_3-alternative" name="3-alternative" placeholder="e.g. : Alternative A -- Description (optional)">{% if form.alternative.value %}{{ form.alternative.value }}{% endif %}</textarea>
+    </div>
+
+    <div class="form-group">
+        <label for="id_3-tie_breaking">Tie breaking:</label>
+        {% if form.tie_breaking.errors %}{{ form.tie_breaking.errors }}{% endif %}
+
+        <div class="checkbox">
+            <input type="checkbox"
+                   id="id_3-tie_breaking"
+                   name="3-tie_breaking"
+                   data-size="default" data-on-text="&nbsp;Customized&nbsp;" data-off-text="&nbsp;Randomized&nbsp;"
+                    {% if form.tie_breaking.value %}
+                   checked="{{ form.tie_breaking.value }}"
+                    {% endif %}>
+            <label id="id_3-label_tie_breaking_random" for="id_3-tie_breaking">&nbsp; The tie breaking rule is <strong>randomly</strong> chosen</label>
+            <label id="id_3-label_tie_breaking_custom" for="id_3-tie_breaking">&nbsp; You <strong>customize</strong> the tie breaking rule </label>
+        </div>
+    </div>
+
+    <div class="form-group to-hide">
+        <p class="help-block"> The lexicographic order should contain each alternative's name. </p>
+        <label class="control-label" for="id_3-tie_breaking_rule">Tie breaking rule</label>
+        {% if form.tie_breaking_rule.errors %}{{ form.tie_breaking_rule.errors }}{% endif %}
+        <textarea class="form-control" rows="2" id="id_3-tie_breaking_rule"
+                  name="3-tie_breaking_rule" placeholder="e.g. : A > B > C">{% if form.tie_breaking_rule.value %}{{ form.tie_breaking_rule.value }}{% endif %}</textarea>
+    </div>
+{% endblock %}
+
+{% block js_block %}
+    <script type="text/javascript">
+
+        $(function(){
+
+             //init tie_breaking switch
+            $("#id_3-tie_breaking").bootstrapSwitch();
+            if ($('#id_3-tie_breaking').is(':checked')){
+                $('.to-hide').show();
+                $('#id_3-tie_breaking_rule').prop("disabled", false);
+                $('#id_3-label_tie_breaking_custom').show();
+                $('#id_3-label_tie_breaking_random').hide();
+            }
+            else{
+                $('.to-hide').hide();
+                $('#id_3-label_tie_breaking_custom').hide();
+                $('#id_3-label_tie_breaking_random').show();
+                $('#id_3-tie_breaking_rule').attr("disabled", 'disabled');
+            }
+
+            //show or hide tie_breaking
+            $('#id_3-tie_breaking').on('switchChange.bootstrapSwitch', function(event, state) {
+                if (state == true){
+                    $('.to-hide').show();
+                    $('#id_3-tie_breaking_rule').prop("disabled", false);
+                    $('#id_3-label_tie_breaking_custom').show();
+                    $('#id_3-label_tie_breaking_random').hide();
+                }
+                else{
+                    $('.to-hide').hide();
+                    $('#id_3-label_tie_breaking_custom').hide();
+                    $('#id_3-label_tie_breaking_random').show();
+                    $('#id_3-tie_breaking_rule').attr("disabled", 'disabled');
+                }
+            });
+        });
+    </script>
+{% endblock %}
+

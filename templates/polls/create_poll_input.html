@@ -1,0 +1,87 @@
+{% extends "polls/wizard_create_poll.html" %}
+{% load staticfiles %}
+
+{% block head %}
+    <style>
+        #selectable .ui-selecting .thumbnail { border: 5px solid #ac5f31;}
+        #selectable .ui-selected  .thumbnail { border: 5px solid #e7722f;}
+    </style>
+{% endblock %}
+
+{% block form_content %}
+    <p>Please select the <b>input</b> entered by each voter </p>
+    {% if form.input_type.errors %}{{ form.input_type.errors }}{% endif %}
+    <div class="container" id="selectable">
+        <div  class="col-md-2 col-md-offset-1 ui-widget-content {% if form.input_type.value == 'Pf' %}ui-selected{%  endif %}"
+              id="Pf">
+            <div class="thumbnail">
+                <img class='img-responsive' class='img-responsive' src= "{% static 'polls/images/input_most_pref.png' %}" height="150 " width="150" alt="">
+            </div>
+            <p>Most preferred alternative</p>
+        </div>
+        <div  class="col-md-2 ui-widget-content {% if form.input_type.value == 'Di' %}ui-selected{%  endif %}"
+              id="Di">
+            <div class="thumbnail">
+                <img class='img-responsive' class='img-responsive' src= "{% static 'polls/images/input_dicot.png' %}" height="150 " width="150" alt="">
+            </div>
+            <p>Approved alternatives</p>
+        </div>
+        <div  class="col-md-2 ui-widget-content  {% if form.input_type.value == 'Li' %}ui-selected{%  endif %}"
+              id="Li">
+            <div class="thumbnail">
+                <img class='img-responsive' class='img-responsive' src= "{% static 'polls/images/input_borda.png' %}" height="150 " width="150" alt="">
+            </div>
+            <p> Rankings without ties</p>
+        </div>
+        <div  class="col-md-2 ui-widget-content  {% if form.input_type.value == 'Pd' %}ui-selected{%  endif %}"
+              id="Pd">
+            <div class="thumbnail">
+                <img class='img-responsive' class='img-responsive' src= "{% static 'polls/images/input_partial_borda.png' %}" height="150 " width="150" alt="">
+            </div>
+            <p> Rankings with ties</p>
+        </div>
+        <div  class="col-md-2 ui-widget-content {% if form.input_type.value == 'Bi' %}ui-selected{%  endif %}"
+              id="Bi">
+            <div class="thumbnail">
+                <img class='img-responsive' class='img-responsive' src= "{% static 'polls/images/input_complete.png' %}" height="150 " width="150" alt="">
+            </div>
+            <p>Pairwise comparisons</p>
+        </div>
+    </div>
+    <div id="hidden-choice">
+        {% if form.input_type.value %}
+            <input type="hidden" name="1-input_type" value = "{{ form.input_type.value }}">
+        {% endif %}
+    </div>
+
+{% endblock %}
+
+
+
+{% block js_block %}
+    <script type="text/javascript" src="{% static 'jquery/js/jquery-ui-1.11.0.js' %}"></script>
+    <script type="text/javascript" src="{% static 'jquery/js/jquery-ui-touch-punch.js' %}"></script>
+    <script>
+        $(function() {
+            $("#selectable").selectable({
+                selected: function(event, ui) { // prevent to select several alternative
+                    $(ui.selected).addClass("ui-selected").siblings().removeClass("ui-selected");
+                },
+
+                stop: function() {
+                    $( "#hidden-choice > input").remove( );
+                    $( ".ui-selected", this ).each(function() {
+                        var value = $(this).attr('id') ;
+                        if ( value != null) {
+                            $('<input>').attr({
+                                type: 'hidden',
+                                name: '1-input_type',
+                                value: value
+                            }).appendTo('#hidden-choice');
+                        }
+                    });
+                }
+            });
+        });
+    </script>
+{% endblock %}

@@ -1,0 +1,433 @@
+{% extends "polls/wizard_create_poll.html" %}
+{% load staticfiles %}
+
+
+{% block head %}
+    {# style for ballot preview #}
+    {% if  poll_data.input_type == 'Pf' or poll_data.input_type == 'Di' %}
+        <style>
+            #selectable .ui-widget-content {background: white; margin: 0.5em; }
+            #selectable .ui-selecting .ui-widget-content { background: #317eac; color: white; }
+            #selectable .ui-selected .ui-widget-content { background: #2fa4e7; color: white;}
+        </style>
+
+    {% elif poll_data.input_type == 'Li' %}
+        <style>
+            #sortable  .ui-state-default .ui-widget-content {background: white; margin: 0.5em;}
+            #sortable li span { position: absolute; margin-left: -1.3em; }
+        </style>
+    {% else %}
+        <style>
+            .sortable{
+            border: 1px solid black;
+            min-height: 62px;
+            background: white;
+
+        }
+        .sortable  .ui-state-default .ui-widget-content{
+            margin: 0.5em;
+            background: #2fa4e7;
+            color: white;
+        }
+        .sortable li span {
+            position: absolute;
+            margin-left: -1.3em;
+        }
+        </style>
+    </style>
+    {% endif %}
+
+
+{% endblock %}
+
+{% block form_content %}
+    <div class="row">
+        <div class="col-md-8">
+            <h2>Poll settings:</h2>
+            <p><strong>Name of the poll :</strong> {{ poll_data.poll_name }}</p>
+            {% if poll_data.poll_description %}
+                <p><strong>Description :</strong> {{ poll_data.poll_description}}</p>
+            {%  endif %}
+            <p><strong>Temporary results published :</strong>
+                {% if poll_data.poll_temporary_result %}
+                    Yes
+                {% else %}
+                    No
+                {% endif %}
+            </p>
+            <p><strong>Tie Breaking :</strong>
+                {% if tie_breaking_data %}
+                    {{ tie_breaking_data }}
+                {% else %}
+                    Randomized tie breaking
+                {% endif %}
+            </p>
+            <p><strong>Opening date :</strong> {{ poll_data.opening_date|date:"d/m/Y" }}, {{ poll_data.opening_date|time:"H:i" }}</p>
+            <p><strong>Closing date :</strong> {{ poll_data.closing_date|date:"d/m/Y" }}, {{ poll_data.closing_date|time:"H:i" }}</p>
+            <p><strong>Periodic poll: </strong>{{ poll_data.recursive_poll }}
+            {% if poll_data.recursive_poll %}
+                <p><b>Period of the poll: </b>{{ poll_data.recursive_period }} days</p>
+            {% endif %}
+            <p><strong>Visibility of the poll: </strong>
+                {% if poll_data.poll_private %}
+                    Private
+                {% else %}
+                    Public
+                {% endif %}
+            </p>
+            {% if poll_data.poll_private %}
+            <p><strong>Voters can change their votes: </strong>{{ poll_data.poll_change_vote }}
+            {% endif %}
+            </p>
+        </div>
+        {# Display the icons for inputs and outputs #}
+        <div class="col-md-2">
+            <div class="thumbnail">
+                {% if poll_data.input_type ==  'Pf'  %}
+                    <img class='img-responsive' class='img-responsive' src="{% static 'polls/images/input_most_pref.png' %}" height="150 " width="150" >
+                    <div class="caption">
+                        <p style="font-size:120%;" ><b>Input</b><br>Most preferred alternative</p>
+                    </div>
+                {% elif poll_data.input_type == 'Di'  %}
+                    <img class='img-responsive' class='img-responsive' src="{% static 'polls/images/input_dicot.png' %}" height="150 " width="150" >
+                    <div class="caption">
+                        <p style="font-size:120%;" ><b>Input</b><br>Approval</p>
+                    </div>
+                {% elif poll_data.input_type == 'Li' %}
+                    <img class='img-responsive' class='img-responsive' src="{% static 'polls/images/input_borda.png' %}" height="150 " width="150" >
+                    <div class="caption">
+                        <p style="font-size:120%;" ><b>Input</b><br>Rankings without ties</p>
+                    </div>
+                {% elif poll_data.input_type == 'Pd' %}
+                    <img class='img-responsive' class='img-responsive' src="{% static 'polls/images/input_partial_borda.png' %}" height="150 " width="150" >
+                    <div class="caption">
+                        <p style="font-size:120%;" ><b>Input</b><br>Rankings with ties</p>
+                    </div>
+                {% elif poll_data.input_type == 'Bi' %}
+                    <img class='img-responsive' class='img-responsive' src="{% static 'polls/images/input_complete.png' %}" height="150 " width="150" >
+                    <div class="caption">
+                        <p style="font-size:120%;" ><b>Input</b><br>Pairwise comparisons</p>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <div class="col-md-2">
+            <div class="thumbnail">
+                {% if poll_data.output_type == 'B' %}
+                    <img class='img-responsive' class='img-responsive' src="{% static 'polls/images/output_alternative.png' %}" height="150 " width="150" >
+                    <div class="caption">
+                        <p style="font-size:120%;" ><b>Output</b><br>Unique winner</p>
+                    </div>
+                {% elif poll_data.output_type == 'L' %}
+                    <img class='img-responsive' class='img-responsive' src="{% static 'polls/images/output_lottery.png' %}" height="150 " width="150" >
+                    <div class="caption">
+                        <p style="font-size:120%;" ><b>Output</b><br>Lottery</p>
+                    </div>
+                {% elif poll_data.output_type == 'R' %}
+                    <img class='img-responsive' class='img-responsive' src="{% static 'polls/images/output_ranking.png' %}" height="150 " width="150" >
+                    <div class="caption">
+                        <p style="font-size:120%;" ><b>Output</b><br>Rankings</p>
+                    </div>
+                {%  endif %}
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-md-12">
+            <h2>Participants:</h2>
+            {%  for  participant in participant_data %}
+                <p>{{ participant }}</p>
+            {% endfor %}
+        </div>
+    </div>
+{% endblock %}
+
+{%  block preview %}
+    <h1>Preview of the ballot:</h1>
+    {% if  poll_data.input_type == 'Pf'%}
+        {# Ballot for most pref alt #}
+        <div class="jumbotron">
+            <div class="container">
+                <div class="row">
+                    <div class="col-md-9">
+                        <h2>{{ poll_data.poll_question}}</h2>
+                        {% if poll_data.poll_description %}<p>{{ poll_data.poll_description }}</p>{% endif %}
+                    </div>
+                    <div class="col-md-2 col-md-offset-1">
+                        <img class='img-responsive' class='img-responsive' src="{% static 'polls/images/input_most_pref.png' %}" height="150 " width="150" >
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-12">
+                        <form role = "form" class="form-horizontal" method="post">
+                            <div class="form-group">
+                                <div class="container" id="selectable">
+                                    {% for alternative in alternative_data %}
+                                        <div class="row ">
+                                            <div class="col-sm-7 ui-widget-content">
+                                                <p><strong>{{ alternative.alternative_name }}</strong></p>
+                                            </div>
+                                        </div>
+                                    {% endfor %}
+                                </div>
+                            </div>
+                            <br>
+                            <input type="submit" class="btn btn-primary" value="Vote" disabled>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    {% elif  poll_data.input_type == 'Di'%}
+        {# Ballot for dic prof #}
+        <div class="jumbotron">
+            <div class="container">
+                <div class="row">
+                    <div class="col-md-9">
+                        <h2>{{ poll_data.poll_question}}</h2>
+                        {% if poll_data.poll_description %}<p>{{ poll_data.poll_description }}</p>{% endif %}
+                    </div>
+                    <div class="col-md-2 col-md-offset-1">
+                        <img class='img-responsive' class='img-responsive' src="{% static 'polls/images/input_dicot.png' %}" height="150 " width="150" >
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-12">
+                        <form class="form-horizontal" role = "form" method="post">
+                            <div class="form-group">
+                                <div class="container" id="selectable">
+                                    {% for alternative in alternative_data %}
+                                        <div class="row">
+                                            <div class="col-sm-7 ui-widget-content">
+                                                <p><strong>{{ alternative.alternative_name }}</strong></p>
+                                            </div>
+                                        </div>
+                                    {% endfor %}
+                                </div>
+                            </div>
+                            <br>
+                            <input type="submit" class="btn btn-primary" value="Vote" disabled>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        {# Ballot for linear order #}
+    {% elif  poll_data.input_type == 'Li'%}
+        <div class="jumbotron">
+            <div class="container">
+                <div class="row">
+                    <div class="col-md-9">
+                        <h2>{{ poll_data.poll_question}}</h2>
+                        {% if poll_data.poll_description %}<p>{{ poll_data.poll_description }}</p>{% endif %}
+                    </div>
+                    <div class="col-md-2 col-md-offset-1">
+                        <img class='img-responsive' class='img-responsive' src="{% static 'polls/images/input_borda.png' %}" height="150 " width="150" >
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-12">
+                        <form class="form-horizontal" role = "form" method="post">
+                            <div class="form-group">
+                                <div class="container" id="sortable">
+                                    {% for alternative in alternative_data %}
+                                        <div class="row ui-state-default">
+                                            <div class="col-sm-7 ui-widget-content">
+                                                <p><span class="glyphicon glyphicon-resize-vertical"></span> <strong>{{ alternative.alternative_name }}</strong></p>
+                                            </div>
+                                        </div>
+                                    {% endfor %}
+                                </div>
+                            </div>
+                            <input type="submit" class="btn btn-primary" value="Vote" disabled>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+
+    {% elif  poll_data.input_type == 'Pd'%}
+        {# Ballot for  preorder #}
+        <div class="jumbotron">
+            <div class="container">
+                <div class="row">
+                    <div class="col-md-9">
+                        <h2>{{ poll_data.poll_question}}</h2>
+                        {% if poll_data.poll_description %}<p>{{ poll_data.poll_description }}</p>{% endif %}
+                    </div>
+                    <div class="col-md-2 col-md-offset-1">
+                        <img class='img-responsive' class='img-responsive' src="{% static 'polls/images/input_partial_borda.png' %}" height="150 " width="150" >
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-12">
+                        <form class="form-horizontal" role = "form"  method="post">
+                            <div class="form-group">
+                                {% for alternative in alternative_data %}
+                                    <p><b>Rank {{ forloop.counter }} </b></p>
+                                    <div class="container connectedSortable sortable" id="sortable_{{ forloop.counter }}">
+                                    </div>
+                                {% endfor %}
+                                <p><b>To rank </b></p>
+                                <div class="container connectedSortable sortable" id="sortable_to_rank">
+                                    {% for alternative in alternative_data %}
+                                        <div class="row ui-state-default">
+                                            <div class="col-md-11 ui-widget-content">
+                                                <p><span class="glyphicon glyphicon-resize-vertical"></span> <strong>{{ alternative.alternative_name }}</strong></p>
+                                            </div>
+                                        </div>
+                                    {% endfor %}
+                                </div>
+                            </div>
+                            <br>
+                            <input type="submit" class="btn btn-primary" value="Vote" disabled>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+
+    {% elif  poll_data.input_type == 'Bi'%}
+        {# Ballot for  binary relation #}
+        <div class="jumbotron">
+            <div class="container">
+                <div class="row">
+                    <div class="col-md-9">
+                        <h2>{{ poll_data.poll_question}}</h2>
+                        {% if poll_data.poll_description %}<p>{{ poll_data.poll_description }}</p>{% endif %}
+                    </div>
+                    <div class="col-md-2 col-md-offset-1">
+                        <img class='img-responsive' class='img-responsive' src="{% static 'polls/images/input_complete.png' %}" height="150 " width="150" >
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-12">
+                        <form class="form-horizontal" role = "form"  method="post">
+                            {% for alternative_1 in alternative_data %}
+                                {% for alternative_2 in alternative_data %}
+                                    {% if forloop.parentloop.counter < forloop.counter %}
+                                        <div class="form-group">
+                                            <div class="col-sm-4 text-right">
+                                                <p><strong>{{ alternative_1.alternative_name }}</strong></p>
+                                            </div>
+                                            <div class="col-md-1 connectedSortable_{{forloop.parentloop.counter}}_{{forloop.counter}} sortable" id ="sortable_{{forloop.parentloop.counter}}_{{forloop.counter}}_1">
+                                            </div>
+                                            <div class="col-md-1 connectedSortable_{{forloop.parentloop.counter}}_{{forloop.counter}} sortable" id ="sortable_{{forloop.parentloop.counter}}_{{forloop.counter}}_2">
+                                                <div class="raw ui-state-default" id="{{forloop.parentloop.counter}}_{{forloop.counter}}">
+                                                    <div class="col-md-12 ui-widget-content" >
+                                                        <p><span class="glyphicon glyphicon-resize-horizontal"></span></p>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-1 connectedSortable_{{forloop.parentloop.counter}}_{{forloop.counter}} sortable" id ="sortable_{{forloop.parentloop.counter}}_{{forloop.counter}}_3">
+                                            </div>
+                                            <div class="col-md-5">
+                                                <p><strong>{{ alternative_2.alternative_name }}</strong></p>
+                                            </div>
+                                        </div>
+                                    {% endif %}
+                                {% endfor %}
+                            {% endfor %}
+                            <div id="hidden-choice">
+                                {#  contains all hidden input for each alternative selected #}
+                                {# init if the voter votes without changing the order #}
+                                {% for alternative_1 in poll.alternative_set.all %}
+                                    {% for alternative_2 in poll.alternative_set.all %}
+                                        {% if alternative_1.pk < alternative_2.pk %}
+                                            <input type="hidden"
+                                                   id = "id_comparison_{{forloop.parentloop.counter}}_{{forloop.counter}}"
+                                                   name = "comparison_{{forloop.parentloop.counter}}_{{forloop.counter}}"
+                                                   value="-1">
+                                        {% endif %}
+                                    {% endfor %}
+                                {% endfor %}
+                            </div>
+
+                            <br>
+                            <input type="submit" class="btn btn-primary" value="Vote" disabled>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    {%  endif %}
+{%  endblock %}
+
+
+{% block js_block %}
+    {# js for ballot proview #}
+    <script type="text/javascript" src="{% static 'jquery/js/jquery-ui-1.11.0.js' %}"></script>
+    <script type="text/javascript" src="{% static 'jquery/js/jquery-ui-touch-punch.js' %}"></script>
+    {% if  poll_data.input_type == 'Pf' %}
+        <script>
+            $(function() {
+                $("#selectable").selectable({
+                    selected: function(event, ui) { // prevent to select several alternative
+                        $(ui.selected).addClass("ui-selected").siblings().removeClass("ui-selected");
+                    },
+                });
+            });
+        </script>
+
+    {% elif  poll_data.input_type == 'Di' %}
+        <script>
+            $(function() {
+                $( "#selectable" ).selectable();
+            });
+        </script>
+    {% elif  poll_data.input_type == 'Li' %}
+        <script>
+            $(function() {
+                $( "#sortable" ).sortable();
+                $( "#sortable" ).disableSelection();
+            });
+        </script>
+    {% elif poll_data.input_type == 'Pd' %}
+        <script>
+            $(function() {
+                {% for alternative in alternative_data %}
+                    $( "#sortable_{{ forloop.counter }}" ).sortable({
+                        connectWith: ".connectedSortable",
+                    });
+                    $( "#sortable_{{ forloop.counter }}" ).disableSelection();
+                {% endfor %}
+                $( "#sortable_to_rank" ).sortable({
+                    connectWith: ".connectedSortable",
+                });
+                $( "#sortable_to_rank" ).disableSelection();
+            });
+        </script>
+    {% elif poll_data.input_type == 'Bi' %}
+        <script>
+        $(function() {
+            {% for alternative_1 in alternative_data %}
+                {% for alternative_2 in alternative_data %}
+                    {% if forloop.parentloop.counter < forloop.counter %}
+
+                        $( "#sortable_{{forloop.parentloop.counter}}_{{forloop.counter}}_1" ).sortable({
+                            connectWith: ".connectedSortable_{{forloop.parentloop.counter}}_{{forloop.counter}}"
+                        });
+                        $( "#sortable_{{forloop.parentloop.counter}}_{{forloop.counter}}_1" ).disableSelection();
+
+                        $( "#sortable_{{forloop.parentloop.counter}}_{{forloop.counter}}_2" ).sortable({
+                            connectWith: ".connectedSortable_{{forloop.parentloop.counter}}_{{forloop.counter}}"
+                        });
+                        $( "#sortable_{{forloop.parentloop.counter}}_{{forloop.counter}}_2" ).disableSelection();
+
+                        $( "#sortable_{{forloop.parentloop.counter}}_{{forloop.counter}}_3" ).sortable({
+                            connectWith: ".connectedSortable_{{forloop.parentloop.counter}}_{{forloop.counter}}"
+                        });
+                        $( "#sortable_{{forloop.parentloop.counter}}_{{forloop.counter}}_3" ).disableSelection();
+                    {%  endif %}
+                {% endfor %}
+            {% endfor %}
+        });
+    </script>
+    {% endif %}
+
+{% endblock %}

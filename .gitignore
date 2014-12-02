@@ -3,12 +3,6 @@ __pycache__/
 *.py[cod]
 
 
-# Django stuff:
-/pnyx/settings.py
-/pnyx/settings.pyc
-
-
-
 # OSX Finder turds
 .DS_Store
 

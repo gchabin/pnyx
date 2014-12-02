@@ -1,0 +1,144 @@
+{% extends "base/base.html" %}
+{% load staticfiles %}
+{% load static %}
+{% load extra_vote_tags %}
+
+{% block head %}
+    <style>
+        .sortable{
+            border: 1px solid black;
+            min-height: 62px;
+            background: white;
+
+        }
+        .sortable .ui-widget-content {
+            margin: 0.5em;
+            min-height: 20px;
+            background: #2fa4e7;
+            color: white;
+        }
+        .sortable li span {
+            position: absolute;
+            margin-left: -1.3em;
+        }
+    </style>
+{% endblock %}
+
+{% block content %}
+
+    <div class="container">
+        <div class="row">
+            <div class="col-md-12">
+                <h1>{{ poll.name }}</h1>
+                <p>Specify your preferred order by dropping the alternatives in the right bucket.
+                    Ties are allowed and empty buckets are ignored</p>
+            </div>
+        </div>
+        <div class="jumbotron">
+            <div class="container">
+                <div class="row">
+                    <div class="col-md-9">
+                        <h2>{{ poll.question }}</h2>
+                        {% if poll.description %}<p>{{ poll.description }}</p>{% endif %}
+                    </div>
+                    <div class="col-md-2 col-md-offset-1">
+                        <img class='img-responsive' src="{% static 'polls/images/input_partial_borda.png' %}" height="150 " width="150" >
+                    </div>
+                </div>
+                {%  if ballot_data %}
+                    <div class="row">
+                        <div class="col-md-12">
+                            <p>You already voted. Every new submission will override the previous vote.</p>
+                        </div>
+                    </div>
+                {% endif %}
+                <div class="row">
+                    <div class="col-md-12">
+                        <form class="form-horizontal" role = "form" action="{% url 'vote:vote' poll.id voter_uuid %}" method="post">
+                            {% csrf_token %}
+                            {% if error_message %}
+                                <div class="form-group">
+                                    <p><strong>{{ error_message }}</strong></p>
+                                </div>
+                            {% endif %}
+                            <div class="form-group">
+                                {% for alternative in poll.alternative_set.all %}
+                                    <p><b>Rank {{ forloop.counter }} </b></p>
+                                    <div class="container connectedSortable sortable" id="sortable_{{ forloop.counter }}">
+                                        {% if ballot_data  %}
+                                            {% for alternative in ballot_data|keyvalue:forloop.counter %}
+                                                <div class="row ui-state-default" id="{{ alternative.pk }}">
+                                                    <div class="col-sm-7 ui-widget-content">
+                                                        <p><span class="glyphicon glyphicon-resize-vertical"></span> <strong>{{ alternative.name }} {% if alternative.description %}: {{ alternative.description }}{% endif %}</strong></p>
+                                                    </div>
+                                                </div>
+                                            {% endfor %}
+                                        {%  endif %}
+                                    </div>
+                                {% endfor  %}
+                                {# init all alternatives in a "to rank" bucket #}
+                                <p><b>To rank </b></p>
+                                <div class="container connectedSortable sortable" id="sortable_to_rank">
+                                    {% if not ballot_data  %}
+                                        {% for alternative in poll.alternative_set.all %}
+                                            <div class="row ui-state-default" id="{{ alternative.pk }}">
+                                                <div class="col-sm-7 ui-widget-content">
+                                                    <p><span class="glyphicon glyphicon-resize-vertical"></span> <strong>{{ alternative.name }} {% if alternative.description %}: {{ alternative.description }}{% endif %}</strong></p>
+                                                </div>
+                                            </div>
+                                        {% endfor %}
+                                    {% endif %}
+                                </div>
+                            </div>
+                            <div id="hidden-choice">
+                                {#  contains all hidden alternative input for each alternative selected #}
+                                {% if ballot_data  %}
+                                    {% for rank, alternative_list in ballot_data.items %}
+                                        {% for alternative in alternative_list %}
+                                            <input type="hidden" name ="choice_{{ rank }}" value="{{ alternative.pk }}">
+                                        {% endfor %}
+                                    {% endfor %}
+                                {%  endif %}
+                            </div>
+                            <br>
+                            <input type="submit" class="btn btn-primary" value="Vote">
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+
+{% block js_block %}
+    <script type="text/javascript" src="{% static 'jquery/js/jquery-ui-1.11.0.js' %}"></script>
+    <script type="text/javascript" src="{% static 'jquery/js/jquery-ui-touch-punch.js' %}"></script>
+    <script>
+        $(function() {
+            {% for alternative in poll.alternative_set.all %}
+                $( "#sortable_{{ forloop.counter }}" ).sortable({
+                    connectWith: ".connectedSortable",
+                    deactivate: function() {
+                        $( "#hidden-choice > input[name='choice_{{ forloop.counter }}']").remove( );
+                        $( ".ui-state-default", this ).each(function() {
+                            var value = $(this).attr('id') ;
+                            if (value != null ) {
+                                $('<input>').attr({
+                                    type: 'hidden',
+                                    name: 'choice_{{ forloop.counter }}' ,
+                                    value: value
+                                }).appendTo('#hidden-choice');
+                            }
+                        });
+                    }
+                });
+                $( "#sortable_{{ forloop.counter }}" ).disableSelection();
+            {% endfor %}
+
+            $( "#sortable_to_rank" ).sortable({
+                connectWith: ".connectedSortable",
+            });
+            $( "#sortable_to_rank" ).disableSelection();
+        });
+    </script>
+{% endblock %}

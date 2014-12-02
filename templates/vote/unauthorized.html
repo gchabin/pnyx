@@ -1,0 +1,15 @@
+{% extends "base/base.html" %}
+{% load staticfiles %}
+
+
+
+{% block content %}
+    <div class = "container">
+
+    <div class="jumbotron">
+        <div class="col-md-offset-1">
+            <h1>You are not registered as a participant of this poll.</h1>
+            <a type="button" class="btn btn-primary" href="{%  url 'polls:index' %}">Getting started with Pnyx</a>
+        </div>
+    </div>
+{%  endblock %}

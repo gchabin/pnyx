@@ -1,0 +1,70 @@
+{% extends "base/base.html" %}
+{% load staticfiles %}
+{% load static %}
+
+{% comment %}
+poll : Poll the corresponding poll
+lottery : list (Alternative name, p)
+{% endcomment%}
+{% block content %}
+    <div class="container">
+        <div class="jumbotron">
+            <div class="container">
+                <div class="row">
+                    <div class="col-md-9">
+                        <h1>{{ poll.question }}</h1>
+                    </div>
+                    <div class="col-md-2 col-md-offset-1">
+                        <img class='img-responsive' src="{% static 'polls/images/output_lottery.png' %}" height="150 " width="150" >
+                    </div>
+                </div>
+                <div class="row">
+                    <h2>The representative lottery is:</h2>
+                </div>
+                <div class="row">
+                    <div class="col-md-5 col-md-offset-1">
+                        <ul class="list-group">
+                            {% for alternative_name , score_value in lottery %}
+                                <li class="list-group-item">
+                                    <span class="badge">{{ score_value }} %</span>
+                                    {{ alternative_name }}
+                                </li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+
+                    <div class = "col-md-6">
+                        <div class="progress">
+                            {% for alternative_name , score_value in lottery %}
+                               <div class="progress-bar progress-bar{% cycle '' '-info' '-warning' %}" style="width: {{ score_value }}%">{{ alternative_name }}</div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+                {% if poll.tie_breaking_used == None %}
+                    <p>Tie-breaking might have been necessary but the poll administrator has not had any influence on it.</p>
+                {% endif %}
+
+                {% if nb_voter != None %}
+                    <div class ='row'>
+                        <div class="col-md-5 col-md-offset-1">
+                            <h3>Stats:</h3>
+                            <p><strong>{{ nb_voter }}</strong>  voter{{ nb_voter|pluralize }} already voted</p>
+                            {% if poll.private %}
+                                {% with total=poll.participant.all|length %}
+                                    <p><strong>{{ total }}</strong> voter{{ total|pluralize }} registered</p>
+                                {% endwith %}
+                            {% endif %}
+                            <p><strong>Progress of the poll</strong>: {{ poll.get_progress }}%</p>
+                        </div>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+{% endblock %}
+
+
+
+
+

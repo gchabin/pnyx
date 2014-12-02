@@ -1,0 +1,17 @@
+{% extends "base/base.html" %}
+{% load staticfiles %}
+
+
+
+{% block content %}
+    <div class = "container">
+
+    <div class="jumbotron">
+        <div class="col-md-offset-1">
+            <h1>This poll has not been opened yet</h1>
+            <p>You will be able to vote from {{ poll.opening_date|date:"d/m/Y" }}, {{ poll.opening_date|time:"H:i" }} to {{ poll.closing_date|date:"d/m/Y" }}, {{ poll.closing_date|time:"H:i" }}</p>
+            <a type="button" class="btn btn-primary" href="{%  url 'polls:index' %}">Getting started with Pnyx</a>
+        </div>
+    </div>
+
+{%  endblock %}

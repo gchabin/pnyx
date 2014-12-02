@@ -1,0 +1,90 @@
+{% extends "base/base.html" %}
+{% load staticfiles %}
+{% load static %}
+
+{% comment %}
+the template contain 2 objects:
+rank : list of tuple (alternative name, score)
+show_detail : booloean (if score is meaningful and available)
+
+{% endcomment %}
+
+{% block content %}
+    <div class="container">
+        <div class="jumbotron">
+            <div class="container">
+                <div class="row">
+                    <div class="col-md-9">
+                        <h1>{{ poll.question }}</h1>
+                    </div>
+                    <div class="col-md-2 col-md-offset-1">
+                        <img class='img-responsive' src="{% static 'polls/images/output_ranking.png' %}" height="150 " width="150">
+                    </div>
+                </div>
+                <div class="row">
+                    <h2>The representative ranking is:</h2>
+                </div>
+                <div class="row">
+                    <div class="col-md-5 col-md-offset-1">
+                        <ul class="list-group">
+                            {% for alternative_name , score in rank %}
+                                <li class="list-group-item text-center">
+                                <span class="badge pull-left">{{ forloop.counter }}</span>
+                                         {{ alternative_name }}
+                                </li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+                </div>
+                {% if poll.tie_breaking_used %}
+                    <div class="row">
+                        <p>
+                            Tie-breaking has been performed.
+                            {% if poll.tie_breaking == 'Custom' %}
+                                The tie-breaking order has been defined by the poll admin before the poll opened.
+                            {% else %}
+                                The tie-breaking order has been randomly generated before the poll opened and has been hidden from the poll administrator.
+                            {% endif %}
+                        </p>
+                    </div>
+                {% elif poll.tie_breaking_used == None %}
+                    <p>Tie-breaking might have been necessary but the poll administrator has not had any influence on it.</p>
+                {% endif %}
+                {% if show_detail %}
+                    <div class="row">
+                        <h3>Detailed scores:</h3>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-5 col-md-offset-1">
+                            <ul class="list-group">
+                                {% for alternative_name , score_value in rank %}
+                                    <li class="list-group-item">
+                                        <span class="badge">{{ score_value }}</span>
+                                        {{ alternative_name }}
+                                    </li>
+                                {% endfor %}
+                            </ul>
+                        </div>
+                        {% if nb_voter != None %}
+                            <div class="col-md-5 col-md-offset-1">
+                                <h3>Stats:</h3>
+                                <p><strong>{{ nb_voter }}</strong>  voter{{ nb_voter|pluralize }} already voted</p>
+                                {% if poll.private %}
+                                    {% with total=poll.participant.all|length %}
+                                        <p><strong>{{ total }}</strong> voter{{ total|pluralize }} registered</p>
+                                    {% endwith %}
+                                {% endif %}
+                                <p><strong>Progress of the poll</strong>: {{ poll.get_progress }}%</p>
+                            </div>
+                        {% endif %}
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+{% endblock %}
+
+
+
+
+

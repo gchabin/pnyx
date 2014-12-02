@@ -1,0 +1,18 @@
+{% load i18n %}{% autoescape off %}Hello,
+
+You're receiving this email because {{admin}} created a poll on Pnyx. He added you as participant.
+
+Here is the link for your ballot:
+{{ protocol }}://{{ domain }}{%  url 'vote:get_ballot_view' poll.pk voter_uuid %}
+The poll opens on {{ poll.opening_date }} and will close on {{ poll.closing_date }}
+
+Here is the link for the final results:
+{{ protocol }}://{{ domain }}{%  url 'vote:results' poll.pk voter_uuid %}
+{% if poll.temporary %} You can also see the temporary results
+{{ protocol }}://{{ domain }}{%  url 'vote:temp_results' poll.pk voter_uuid %}{% endif %}
+
+Thanks for using Pnyx!
+
+The Pnyx team
+
+{% endautoescape %}

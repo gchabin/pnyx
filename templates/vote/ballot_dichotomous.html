@@ -1,0 +1,109 @@
+{% extends "base/base.html" %}
+{% load staticfiles %}
+{% load static %}
+
+{% block head %}
+    <style>
+        #selectable .ui-widget-content {background: white; margin: 0.5em; }
+        #selectable .ui-selecting .ui-widget-content { background: #317eac; color: white; }
+        #selectable .ui-selected .ui-widget-content { background: #2fa4e7; color: white;}
+    </style>
+{% endblock %}
+
+{% block content %}
+    <div class="container">
+        <div class="row">
+            <div class="col-md-12">
+                <h1>{{ poll.name }}</h1>
+                <p>Select <b>all</b> alternatives you approve the most. Hold cmd to select several of them.</p>
+            </div>
+        </div>
+        <div class="jumbotron">
+            <div class="container">
+                <div class="row">
+                    <div class="col-md-9">
+                        <h2>{{ poll.question }}</h2>
+                        {% if poll.description %}<p>{{ poll.description }}</p>{% endif %}
+                    </div>
+                    <div class="col-md-2 col-md-offset-1">
+                        <img class='img-responsive' src="{% static 'polls/images/input_dicot.png' %}" height="150 " width="150" >
+                    </div>
+                </div>
+                {%  if ballot_data %}
+                    <div class="row">
+                        <div class="col-md-12">
+                            <p>You already voted. Every new submission will override the previous vote.</p>
+                        </div>
+                    </div>
+                {% endif %}
+                <div class="row">
+                    <div class="col-md-12">
+                        <form class="form-horizontal" role = "form" action="{% url 'vote:vote' poll.id voter_uuid%}" method="post">
+                            {% csrf_token %}
+                            {% if error_message %}
+                                <div class="form-group">
+                                    <p><strong>{{ error_message }}</strong></p>
+                                </div>
+                            {% endif %}
+                            <div class="form-group">
+                                <div class="container" id="selectable">
+                                    {% for alternative in poll.alternative_set.all %}
+                                        <div class="row" id="{{ alternative.pk }}">
+                                            <div class="col-sm-7 ui-widget-content" >
+                                                <p><strong>{{ alternative.name }} {% if alternative.description %}: {{ alternative.description }}{% endif %}</strong></p>
+                                            </div>
+                                        </div>
+                                    {% endfor %}
+                                </div>
+                            </div>
+                            <div id="hidden-choice">
+                                {# Will contain all hidden input for each alternative selected #}
+                                {% for alternative in ballot_data.1 %}
+                                        <input type="hidden" name="choice" value="{{ alternative.pk }}">
+                                {% endfor %}
+                            </div>
+                            <br>
+                            <input type="submit" class="btn btn-primary" value="Vote">
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+{% endblock %}
+
+{% block js_block %}
+    <script type="text/javascript" src="{% static 'jquery/js/jquery-ui-1.11.0.js' %}"></script>
+    <script type="text/javascript" src="{% static 'jquery/js/jquery-ui-touch-punch.js' %}"></script>
+    <script>
+        $(function() {
+
+            //init the form from the hidden input
+            $( "input[name='choice']" , this ).each(function() {
+                var pk = $(this).attr('value') ;
+                $( "#"+pk).addClass("ui-selected");
+            });
+
+            $( "#selectable" ).bind( "mousedown", function ( e ) {
+                e.metaKey = true;
+            }).selectable({
+                //load the selection in the input
+                stop: function() {
+                    $( "#hidden-choice > input").remove( );
+                    $( ".ui-selected", this ).each(function() {
+                        var value = $(this).attr('id') ;
+                        if ( value != null ) {
+                            $('<input>').attr({
+                                type: 'hidden',
+                                name: 'choice',
+                                value: value
+                            }).appendTo('#hidden-choice');
+                        }
+                    });
+                }
+            });
+        });
+    </script>
+{% endblock %}

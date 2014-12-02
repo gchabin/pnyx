@@ -1,0 +1,66 @@
+{% extends "base/base.html" %}
+
+
+{% block content %}
+    <div class = "container">
+        <h1>Enter the new settings</h1>
+        <div class="jumbotron">
+            <div class="col-md-offset-1">
+                <form method="post" role = "form" action="{% url 'polls:setup' poll_pk %}">
+                    {% csrf_token %}
+                    {% if set_up_poll_form.non_field_errors %}
+                        <div class="form-group">
+                            <p><strong>{{ set_up_poll_form.non_field_errors }}</strong></p>
+                        </div>
+                    {% endif %}
+                    <h2 class="text-muted">Name &amp; description of the poll</h2>
+                    <div class="form-group">
+                        <label class="control-label" for="id-poll_name">Name of the poll</label>
+                        <input type="text" class="form-control" id="id-poll_name" name="poll_name" value= "{{ set_up_poll_form.poll_name.value }}">
+                        {% if set_up_poll_form.poll_name.errors %}<p><strong>{{ set_up_poll_form.poll_name.errors }}</strong></p>{% endif %}
+                    </div>
+                    <div class="form-group">
+                        {% if set_up_poll_form.poll_description.errors %}<p><strong>{{ set_up_poll_form.poll_description.errors }}</strong></p>{% endif %}
+                        <label class="control-label" for="id_poll_description">Description</label>
+                        <textarea class="form-control" rows="3" id="id_poll_description" name="poll_description">{{ set_up_poll_form.poll_description.value }}</textarea>
+                    </div>
+                    <h2 class="text-muted">Visibility of the results and timeframe</h2>
+                    {% if set_up_poll_form.temporary_result.errors %}<p><strong>{{ set_up_poll_form.temporary_result.errors }}</strong></p>{% endif %}
+                    <div class="form-group">
+                        <div class="checkbox">
+                            <input type="checkbox" id="id-poll_temporary_result" name="poll_temporary_result"
+                                   data-size="small" data-on-text="Yes" data-off-text="No"
+                                    {% if set_up_poll_form.poll_temporary_result.value %}
+                                   checked
+                                    {% endif %}>
+                            <label for="id-poll_temporary_result">&nbsp; The voters are able to see the temporary results</label>
+                        </div>
+                    </div>
+                    <label>Timeframe of the poll</label>
+                    <div class="input-group col-md-6"> <span class="input-group-addon">Closing date &nbsp;</span>
+                        <input type="datetime" id="id-closing_date" name="closing_date" class="form-control" value = "{{ set_up_poll_form.closing_date.value }}">
+                    </div>
+                    {% if set_up_poll_form.closing_date.errors %}<p><strong>{{ set_up_poll_form.closing_date.errors }}</strong></p>{% endif %}
+                    <br>
+                    <div class="form-group">
+                        <h2 class="text-muted">Voters</h2>
+                        <label class="control-label" for="id_voter_to_add">Add new voters here</label>
+                        {% if set_up_poll_form.voter_to_add.errors %}<p><strong>{{ set_up_poll_form.voter_to_add.errors }}</strong></p>{% endif %}
+                        <textarea class="form-control" rows="3" id="id_voter_to_add" name="voter_to_add" >{% if set_up_poll_form.voter_to_add.value %}{{ set_up_poll_form.voter_to_add.value }}{%  endif %}</textarea>
+                    </div>
+                    <div class="form-group">
+                        <input type="submit" class="btn btn-default pull-right" value="Save">
+                        <a class="btn btn-default" href="{% url 'polls:detail' poll_pk %}" role="button"> &laquo; Back</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+{% endblock %}
+
+
+{% block js_block %}
+    <script type="text/javascript">
+        //init poll_temporary_result switch
+        $("#id-poll_temporary_result").bootstrapSwitch();
+    </script>
+{% endblock %}

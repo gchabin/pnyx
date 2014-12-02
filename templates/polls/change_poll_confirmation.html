@@ -1,0 +1,15 @@
+{% extends "base/base.html" %}
+{% load staticfiles %}
+
+
+
+{% block content %}
+    <div class = "container">
+        <div class="jumbotron">
+            <div class="col-md-offset-1">
+                <h1>Thank you, the poll has been uptaded</h1>
+                <a type="button" class="btn btn-primary pull-right" href="{%  url 'polls:detail' poll.pk %}">Back to poll details</a>
+            </div>
+        </div>
+    </div>
+{%  endblock %}

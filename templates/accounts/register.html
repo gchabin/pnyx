@@ -1,0 +1,26 @@
+{% extends "base/base_signin.html" %}
+
+{% block content %}
+    <div class="container">
+        <div class="row">
+        <br>
+        <br>
+            <div class="col-md-4 col-md-offset-4">
+                <form id="registration_form" class="form-signin" role="form" method="post" action="{% url 'register' %}">
+                    {% csrf_token %}
+                    <h2 class="form-signin-heading">Create an account</h2>
+                    {% if registration_form.errors %}
+                        <p>You did not fill the form correctly. Please try again.</p>
+                    {% endif %}
+                    <input id="id_username" class="form-control" maxlength="254" placeholder="Username" name="username" type="text" required autofocus/>
+                    <input id="id_email" class="form-control" maxlength="254" placeholder="Email" name="email" type="email" required autofocus/>
+                    <input id="id_password1" class="form-control" name="password1" type="password" placeholder="Password" required/>
+                    <input id="id_password2" class="form-control" name="password2" type="password" placeholder="Confirm password" required/>
+                    <button class="btn btn-lg btn-primary btn-block" type="submit">Create account</button>
+                    <input type="hidden" name="next" value="{{ next }}" />
+                </form>
+            </div>
+        </div>
+    </div>
+
+{% endblock %}

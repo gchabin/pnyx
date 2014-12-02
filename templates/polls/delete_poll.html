@@ -1,0 +1,17 @@
+{% extends "base/base.html" %}
+{% load staticfiles %}
+
+
+
+{% block content %}
+    <div class = "container">
+
+    <div class="jumbotron">
+        <div class="col-md-offset-1">
+            <h1>The poll has been deleted. </h1>
+            <p>The links are not valid anymore</p>
+            <a type="button" class="btn btn-primary" href="{%  url 'polls:manage_poll' %}">Back to your polls</a>
+        </div>
+    </div>
+
+{%  endblock %}

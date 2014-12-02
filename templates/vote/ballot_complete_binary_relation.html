@@ -1,0 +1,227 @@
+{% extends "base/base.html" %}
+{% load staticfiles %}
+{% load static %}
+{% load extra_vote_tags %}
+
+{% block head %}
+    <style>
+        .sortable{
+            border: 1px solid black;
+            min-height: 62px;
+            background: white;
+
+        }
+        .sortable  .ui-state-default .col-md-12 {
+            margin: 0.5em;
+            background: #2fa4e7;
+            color: white;
+        }
+        .sortable li span {
+            position: absolute;
+            margin-left: -1.3em;
+        }
+    </style>
+{% endblock %}
+
+{% block content %}
+
+    <div class="container">
+        <div class="row">
+            <div class="col-md-12">
+                <h1>{{ poll.name }}</h1>
+                <p>Enter your pairwise preferences by dropping the token on the side of the preferred alternative</p>
+            </div>
+        </div>
+        <div class="jumbotron">
+            <div class="container">
+                <div class="row">
+                    <div class="col-md-9">
+                        <h2>{{ poll.question }}</h2>
+                        {% if poll.description %}<p>{{ poll.description }}</p>{% endif %}
+                    </div>
+                    <div class="col-md-2 col-md-offset-1">
+                        <img class='img-responsive' src="{% static 'polls/images/input_complete.png' %}" height="150 " width="150" >
+                    </div>
+                </div>
+                {%  if ballot_data %}
+                    <div class="row">
+                        <div class="col-md-12">
+                            <p>You already voted. Every new submission will override the previous vote.</p>
+                        </div>
+                    </div>
+                {% endif %}
+                <div class="row">
+                    <div class="col-md-12">
+                        <form class="form-horizontal" role = "form" action="{% url 'vote:vote' poll.id voter_uuid%}" method="post">
+                            {% csrf_token %}
+                            {% if error_message %}
+                                <div class="form-group">
+                                    <p><strong>{{ error_message }}</strong></p>
+                                </div>
+                            {% endif %}
+
+                            {% for alternative_1 in poll.alternative_set.all %}
+                                {% for alternative_2 in poll.alternative_set.all %}
+                                    {% if alternative_1.pk < alternative_2.pk %}
+                                        {% with pk1=alternative_1.pk|stringformat:"s" %} {# this converts the primary key of the alternative_1 to a string #}
+                                            {% with pk2=alternative_2.pk|stringformat:"s" %} {# this converts the primary key of the alternative_2 to a string #}
+                                                {% with pk1_pk2=pk1|add:"_"|add:pk2 %} {# this concatenates both strings #}
+                                                    <div class="form-group">
+                                                        <div class="col-sm-4 text-right">
+                                                            <p><strong>{{ alternative_1.name }}</strong></p>
+                                                        </div>
+                                                        <div class="col-md-1 connectedSortable_{{ pk1_pk2 }} sortable"
+                                                             id="sortable_{{ pk1_pk2 }}_1">
+                                                            {% if ballot_data|keyvalue:pk1_pk2 == alternative_1.pk %} {# access to a specific value of the dictionary given the key #}
+                                                                <div class="raw ui-state-default" id="{{ pk1_pk2 }}">
+                                                                    <div class="col-md-12">
+                                                                        <p><span class="glyphicon glyphicon-resize-horizontal"></span></p>
+                                                                    </div>
+                                                                </div>
+                                                            {%  endif %}
+                                                        </div>
+                                                        <div class="col-md-1 connectedSortable_{{ pk1_pk2 }} sortable"
+                                                             id="sortable_{{ pk1_pk2 }}_2">
+                                                            {% if not ballot_data|keyvalue:pk1_pk2 %}
+                                                                <div class="raw ui-state-default" id="{{ pk1_pk2 }}">
+                                                                    <div class="col-md-12">
+                                                                        <p><span class="glyphicon glyphicon-resize-horizontal"></span></p>
+                                                                    </div>
+                                                                </div>
+                                                            {%  endif %}
+                                                        </div>
+                                                        <div class="col-md-1 connectedSortable_{{ pk1_pk2 }} sortable"
+                                                             id="sortable_{{ pk1_pk2 }}_3">
+                                                            {% if ballot_data|keyvalue:pk1_pk2 == alternative_2.pk %}
+                                                            <div class="raw ui-state-default" id="{{ pk1_pk2 }}">
+                                                                <div class="col-md-12">
+                                                                    <p><span class="glyphicon glyphicon-resize-horizontal"></span></p>
+                                                                </div>
+                                                            </div>
+                                                            {% endif %}
+                                                        </div>
+                                                        <div class="col-md-5">
+                                                            <p><strong>{{ alternative_2.name }}</strong></p>
+                                                        </div>
+                                                    </div>
+                                                {% endwith %}
+                                            {% endwith %}
+                                        {% endwith %}
+                                    {% endif %}
+                                {% endfor %}
+                            {% endfor %}
+                            <div id="hidden-choice">
+                                {#  contains all hidden input for each alternative selected #}
+                                {%  if ballot_data %}
+                                    {# init if the voter votes without changing the order #}
+                                    {% for alternative_1 in poll.alternative_set.all %}
+                                        {% for alternative_2 in poll.alternative_set.all %}
+                                            {% if alternative_1.pk < alternative_2.pk %}
+                                                {% with pk1=alternative_1.pk|stringformat:"s" %}
+                                                    {% with pk2=alternative_2.pk|stringformat:"s" %}
+                                                        {% with pk1_pk2=pk1|add:"_"|add:pk2 %}
+                                                            {% if ballot_data|keyvalue:pk1_pk2 %}
+                                                                <input type="hidden"
+                                                                       id = "id_comparison_{{ pk1_pk2 }}"
+                                                                       name = "comparison_{{ pk1_pk2 }}"
+                                                                       value="{{ ballot_data|keyvalue:pk1_pk2 }}">
+                                                            {% else %}
+                                                                <input type="hidden"
+                                                                       id = "id_comparison_{{ pk1_pk2 }}"
+                                                                       name = "comparison_{{ pk1_pk2 }}"
+                                                                       value="-1">
+                                                            {% endif %}
+                                                        {% endwith %}
+                                                    {% endwith %}
+                                                {% endwith %}
+                                            {% endif %}
+                                        {% endfor %}
+                                    {% endfor %}
+                                {% else %}
+                                    {% for alternative_1 in poll.alternative_set.all %}
+                                        {% for alternative_2 in poll.alternative_set.all %}
+                                            {% if alternative_1.pk < alternative_2.pk %}
+                                                <input type="hidden"
+                                                       id = "id_comparison_{{ alternative_1.pk }}_{{ alternative_2.pk }}"
+                                                       name = "comparison_{{ alternative_1.pk }}_{{ alternative_2.pk }}"
+                                                       value="-1">
+                                            {% endif %}
+                                        {% endfor %}
+                                    {% endfor %}
+                                {% endif %}
+                            </div>
+
+                            <br>
+                            <input type="submit" class="btn btn-primary" value="Vote">
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+
+{% block js_block %}
+    <script type="text/javascript" src="{% static 'jquery/js/jquery-ui-1.11.0.js' %}"></script>
+    <script type="text/javascript" src="{% static 'jquery/js/jquery-ui-touch-punch.js' %}"></script>
+    <script>
+
+        $(function() {
+            {% for alternative_1 in poll.alternative_set.all %}
+                {% for alternative_2 in poll.alternative_set.all %}
+                    {% if alternative_1.pk < alternative_2.pk %}
+
+                        $( "#sortable_{{ alternative_1.pk }}_{{ alternative_2.pk }}_1" ).sortable({
+                            connectWith: ".connectedSortable_{{ alternative_1.pk }}_{{ alternative_2.pk }}",
+                            deactivate: function() {
+                                $( ".ui-state-default", this ).each(function() {
+                                    $( "#hidden-choice > #id_comparison_{{ alternative_1.pk }}_{{ alternative_2.pk }}").remove( );
+                                    $('<input>').attr({
+                                        type: 'hidden',
+                                        id: 'id_comparison_{{ alternative_1.pk }}_{{ alternative_2.pk }}' ,
+                                        name: 'comparison_{{ alternative_1.pk }}_{{ alternative_2.pk }}' ,
+                                        value: {{ alternative_1.pk }}
+                                    }).appendTo('#hidden-choice');
+                                });
+                            }
+                        });
+                        $( "#sortable_{{ alternative_1.pk }}_{{ alternative_2.pk }}_1" ).disableSelection();
+
+                        $( "#sortable_{{ alternative_1.pk }}_{{ alternative_2.pk }}_2" ).sortable({
+                            connectWith: ".connectedSortable_{{ alternative_1.pk }}_{{ alternative_2.pk }}",
+                            deactivate: function() {
+                                $( ".ui-state-default", this ).each(function() {
+                                    $( "#hidden-choice > #id_comparison_{{ alternative_1.pk }}_{{ alternative_2.pk }}").remove( );
+                                    $('<input>').attr({
+                                        type: 'hidden',
+                                        id: 'id_comparison_{{ alternative_1.pk }}_{{ alternative_2.pk }}' ,
+                                        name: 'comparison_{{ alternative_1.pk }}_{{ alternative_2.pk }}' ,
+                                        value: -1
+                                    }).appendTo('#hidden-choice');
+                                });
+                            }
+                        });
+                        $( "#sortable_{{ alternative_1.pk }}_{{ alternative_2.pk }}_2" ).disableSelection();
+
+                        $( "#sortable_{{ alternative_1.pk }}_{{ alternative_2.pk }}_3" ).sortable({
+                            connectWith: ".connectedSortable_{{ alternative_1.pk }}_{{ alternative_2.pk }}",
+                            deactivate: function() {
+                                $( ".ui-state-default", this ).each(function() {
+                                    $( "#hidden-choice > #id_comparison_{{ alternative_1.pk }}_{{ alternative_2.pk }}").remove( );
+                                    $('<input>').attr({
+                                        type: 'hidden',
+                                        id: 'id_comparison_{{ alternative_1.pk }}_{{ alternative_2.pk }}' ,
+                                        name: 'comparison_{{ alternative_1.pk }}_{{ alternative_2.pk }}' ,
+                                        value: {{ alternative_2.pk }}
+                                    }).appendTo('#hidden-choice');
+                                });
+                            }
+                        });
+                        $( "#sortable_{{ alternative_1.pk }}_{{ alternative_2.pk }}_3" ).disableSelection();
+
+                    {%  endif %}
+                {% endfor %}
+            {% endfor %}
+        });
+    </script>
+{% endblock %}

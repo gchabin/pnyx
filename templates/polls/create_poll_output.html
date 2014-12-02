@@ -1,0 +1,71 @@
+{% extends "polls/wizard_create_poll.html" %}
+{% load staticfiles %}
+
+{% block head %}
+    <style>
+        #selectable .ui-selecting .thumbnail { border: 5px solid #ac5f31;}
+        #selectable .ui-selected  .thumbnail { border: 5px solid #e7722f;}
+    </style>
+{% endblock %}
+
+{% block form_content %}
+    <p>Please enter the <b>output</b> that will represent the aggregation</p>
+    {% if form.output_type.errors %}{{ form.output_type.errors }}{% endif %}
+     <div class="container" id="selectable">
+        <div  class="col-md-2 col-md-offset-1 ui-widget-content {% if form.output_type.value == 'B' %}ui-selected{%  endif %}"
+              id="B">
+            <div class="thumbnail">
+                <img class='img-responsive' class='img-responsive' src= "{% static 'polls/images/output_alternative.png' %}" height="150 " width="150" alt="">
+            </div>
+            <p>Unique winner</p>
+        </div>
+        <div  class="col-md-2 col-md-offset-1 ui-widget-content {% if form.output_type.value == 'L' %}ui-selected{%  endif %}"
+              id="L">
+            <div class="thumbnail">
+                <img class='img-responsive' class='img-responsive' src= "{% static 'polls/images/output_lottery.png' %}" height="150 " width="150" alt="">
+            </div>
+            <p>Lottery</p>
+        </div>
+        <div  class="col-md-2 col-md-offset-1 ui-widget-content {% if form.output_type.value == 'R' %}ui-selected{%  endif %}"
+              id="R">
+            <div class="thumbnail">
+                <img class='img-responsive' class='img-responsive' src= "{% static 'polls/images/output_ranking.png' %}" height="150 " width="150" alt="">
+            </div>
+            <p>Rankings without ties</p>
+        </div>
+    </div>
+    <div id="hidden-choice">
+        {% if form.output_type.value %}
+            <input type="hidden" name="2-output_type" value = "{{ form.output_type.value }}">
+        {% endif %}
+    </div>
+{% endblock %}
+
+
+{% block js_block %}
+    <script type="text/javascript" src="{% static 'jquery/js/jquery-ui-1.11.0.js' %}"></script>
+    <script type="text/javascript" src="{% static 'jquery/js/jquery-ui-touch-punch.js' %}"></script>
+    <script>
+        $(function() {
+            $("#selectable").selectable({
+                selected: function(event, ui) { // prevent to select several alternative
+                    $(ui.selected).addClass("ui-selected").siblings().removeClass("ui-selected");
+                },
+
+                stop: function() {
+                    $( "#hidden-choice > input").remove( );
+                    $( ".ui-selected", this ).each(function() {
+                        var value = $(this).attr('id') ;
+                        if ( value != null) {
+                            $('<input>').attr({
+                                type: 'hidden',
+                                name: '2-output_type',
+                                value: value
+                            }).appendTo('#hidden-choice');
+                        }
+                    });
+                }
+            });
+        });
+    </script>
+{% endblock %}

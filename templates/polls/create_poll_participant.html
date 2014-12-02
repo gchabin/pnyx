@@ -1,0 +1,15 @@
+{% extends "polls/wizard_create_poll.html" %}
+{% load staticfiles %}
+
+
+{% block form_content %}
+
+    <p>Please enter the emails of the participants.
+    They will receive the links to vote and to access the results.</p>
+    <p class = "help-block">One email per line</p>
+    <div class="form-group">
+        <label class="control-label" for="id_4-participant">Email list:</label>
+        {% if form.participant.errors %}{{ form.participant.errors }}{% endif %}
+        <textarea class="form-control" rows="5" id="id_" name="4-participant" >{% if form.participant.value %}{{ form.participant.value }}{% else %}{{ user.email }}{% endif %}</textarea>
+   </div>
+{% endblock %}
