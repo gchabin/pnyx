@@ -2,16 +2,24 @@
 __pycache__/
 *.py[cod]
 
+
+# Django stuff:
+/pnyx/settings.py
+/pnyx/settings.pyc
+
+
+
+# OSX Finder turds
+.DS_Store
+
 # C extensions
 *.so
 
 # Distribution / packaging
-.Python
-env/
+bin/
 build/
 develop-eggs/
 dist/
-downloads/
 eggs/
 lib/
 lib64/
@@ -22,18 +30,11 @@ var/
 .installed.cfg
 *.egg
 
-# PyInstaller
-#  Usually these files are written by a python script from a template
-#  before PyInstaller builds the exe, so as to inject date/other infos into it.
-*.manifest
-*.spec
-
 # Installer logs
 pip-log.txt
 pip-delete-this-directory.txt
 
 # Unit test / coverage reports
-htmlcov/
 .tox/
 .coverage
 .cache
@@ -42,13 +43,18 @@ coverage.xml
 
 # Translations
 *.mo
-*.pot
+
+# Mr Developer
+.mr.developer.cfg
+.project
+.pydevproject
+
+# Rope
+.ropeproject
 
 # Django stuff:
 *.log
+*.pot
 
 # Sphinx documentation
 docs/_build/
-
-# PyBuilder
-target/
