@@ -15,7 +15,7 @@
         <div class="row">
             <div class="col-md-12">
                 <h1>{{ poll.name }}</h1>
-                <p>Please select your most preferred alternative</p>
+                <p>Please select your most preferred alternative.</p>
             </div>
         </div>
         <div class="jumbotron">
@@ -38,7 +38,7 @@
                 {% endif %}
                 <div class="row">
                     <div class="col-md-12">
-                        <form class="form-horizontal" role = "form" action="{% url 'vote:vote' poll.id voter_uuid %}" method="post">
+                        <form class="form-horizontal" role = "form" action="{% url 'vote:vote' poll.uuid voter_uuid %}" method="post">
                             {% csrf_token %}
                             {% if error_message %}
                                 <div class="form-group">

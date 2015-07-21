@@ -1,0 +1,108 @@
+{% extends "base/base.html" %}
+{% load staticfiles %}
+{% load tz  %}
+{% get_current_timezone as TIME_ZONE %}
+
+
+{% block content %}
+    <div class = "container">
+        <h1>Email the links to your participants</h1>
+        <div class="jumbotron">
+            <div class="col-md-offset-1">
+                <div class = "row">
+                    <h2 class="text-muted">You will find below the links related to your poll</h2>
+                    <p>
+                        The <strong>ballot</strong>:<br>
+                        {{ protocol }}://{{ domain }}{%  url 'vote:get_ballot_view' poll.uuid voter_uuid %}
+                    </p>
+                    <p>
+                        The <strong>final results</strong>:<br>
+                        {{ protocol }}://{{ domain }}{%  url 'vote:results' poll.uuid voter_uuid %}
+                    </p>
+                    {% if poll.temporary %}
+                    <p>
+                         The <strong>temporary results</strong>:<br>
+                        {{ protocol }}://{{ domain }}{%  url 'vote:temp_results' poll.uuid voter_uuid %}
+                    </p>
+                    {% endif %}
+                </div>
+            </div>
+            <div class="col-md-offset-1">
+                <form method="post" role = "form">
+                    {% csrf_token %}
+                    {% if send_link_form.non_field_errors %}
+                        <div class="form-group">
+                            <p><strong>{{ send_link_form.non_field_errors }}</strong></p>
+                        </div>
+                    {% endif %}
+                    <div class = "row">
+                        <h2 class="text-muted">Select the participants to notify</h2>
+                        <div class="form-group">
+                            {% if send_link_form.notify_all.errors %}
+                                <p><strong>{{ send_link_form.notify_all.errors }}</strong></p>
+                            {% endif %}
+                            <div class="checkbox">
+                                <input type="checkbox" id="id_notify_all" name="notify_all"
+                                       data-size="small" data-on-text="Yes" data-off-text="No"
+                                       {% if send_link_form.notify_all.value %}
+                                       checked="{{ send_link_form.notify_all.value }}"{% endif %}>
+                                <label for="id_poll_temporary_result">&nbsp;Notify <strong>all</strong> participants</label>
+                            </div>
+                        </div>
+                    </div>
+                    <div class = "row" id="row_participant_to_notify">
+                        <div class="form-group" id="group_participant_to_notify">
+                            <label for="id_participant_to_notify">Please select the voters you want to notify</label>
+                            {% if send_link_form.participant_to_notify.errors %}<p><strong>{{ send_link_form.participant_to_notify.errors }}</strong></p>{% endif %}
+                            <select class="form-control" id="id_participant_to_notify" name="participant_to_notify" multiple="multiple" row="5">
+                                {% for participant in poll.participant.all %}
+                                    <option>{{ participant.email }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </div>
+                    <div class ='row'>
+                        <br>
+                        <div class="form-group">
+                            <input type="submit" class="btn btn-default pull-right" value="Send">
+                            <a class="btn btn-default" href="{% url 'polls:detail' poll.uuid %}" role="button"> &laquo; Back</a>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+
+{% block js_block %}
+    <script type="text/javascript" src="{% static 'jquery/js/jquery-ui-touch-punch.js' %}"></script>
+    <script type="text/javascript">
+
+        $(function(){
+
+             //init tie_breaking switch
+            $("#id_notify_all").bootstrapSwitch();
+            if ($('#id_notify_all').is(':checked')){
+                $('#row_participant_to_notify').hide();
+                $('#id_participant_to_notify').attr("disabled", 'disabled');
+
+            }
+            else{
+                $('#row_participant_to_notify').show();
+                $('#id_participant_to_notify').prop("disabled", false);
+            }
+
+            //show or hide tie_breaking
+            $('#id_notify_all').on('switchChange.bootstrapSwitch', function(event, state) {
+                if (state == true){
+                    $('#row_participant_to_notify').slideUp();
+                    $('#id_participant_to_notify').attr("disabled", 'disabled');
+                }
+                else{
+                    $('#row_participant_to_notify').slideDown();
+                    $('#id_participant_to_notify').prop("disabled", false);
+                }
+            });
+        });
+    </script>
+{% endblock %}

@@ -62,27 +62,32 @@
         <div class="row featurette">
             <div class="col-md-7">
                 <h2 class="featurette-heading">An easy to use <span class="text-muted">aggregation tool</span></h2>
-                <p class ="lead">Pnyx is a web-based application that allows you to collect preferences of people around you and to aggregate them.
-                    Unlike what other existing solutions offer, Pnyx aims to be easy to use and to optimize the user experience.
-                    Pnyx provides a user-friendly interface in which you can easily create polls, manage them, or even contact the participants.</p>
-                <p class ="lead">Signup to create your first poll, the voters will not require any account and Pnyx provides an intuitive voting interface</p>
-                <p><a href="{% url 'register' %}" class="btn btn-primary pull-right" role="button">Create an account</a></p>
+                <p class ="lead">Pnyx is a web-based application that allows you to collect and aggregate the preferences of several persons.
+                    Unlike existing solutions, Pnyx aims to be easy to use and to optimize the user experience.
+                    Pnyx allows you to easily create and manage polls and get in contact with the participants.</p>
+                <p class ="lead">Sign up in just 1 step to create your first poll. The voters will not need an account and Pnyx provides an intuitive voting interface.</p>
+				<div class="col-md-12">
+                	<a href="{% url 'register' %}" class="btn btn-primary pull-right" role="button">1-step registration</a>
+				</div>
+			
             </div>
-            <div class = "col-md-4 col-md-offset-1">
-                {% if form.errors %}
-                    <p>Your username and password didn't match. Please try again.</p>
-                {% endif %}
+			
+	        <div class = "col-md-4 col-md-offset-1">
+	            {% if form.errors %}
+	                <p>Your username and password didn't match. Please try again.</p>
+	            {% endif %}
 
-                <form class="form-signin" role="form" method="post" action="{% url 'login' %}">
-                    {% csrf_token %}
-                    <h2 class="featurette-heading">Please sign in</h2>
-                    <br>
-                    <input id="id_username" class="form-control" maxlength="254" placeholder="Username" name="username" type="text" required autofocus/>
-                    <input id="id_password" class="form-control" name="password" type="password" placeholder="Password" required/>
-                    <button class="btn btn-primary btn-block" type="submit">Sign in</button>
-                    <a href="{% url 'password_reset' %}" class="btn btn-link pull-right" role="button">Forgot your password?</a>
-                </form>
-            </div>
+	            <form class="form-signin" role="form" method="post" action="{% url 'login' %}">
+	                {% csrf_token %}
+	                <h2 class="featurette-heading">Already registered? <span class="text-muted">Then please sign in</span></h2>
+	                <br>
+	                <input id="id_username" class="form-control" maxlength="254" placeholder="Username" name="username" type="text" required autofocus/>
+	                <input id="id_password" class="form-control" name="password" type="password" placeholder="Password" required/>
+	                <button class="btn btn-primary btn-block" type="submit">Sign in</button>
+	                <a href="{% url 'password_reset' %}" class="btn btn-link pull-right" role="button">Forgot your password?</a>
+	            </form>
+	        </div>
+			
         </div>
 
         <hr class="featurette-divider">
@@ -93,14 +98,15 @@
             </div>
             <div class="col-md-9">
                 <h2 class="featurette-heading">A well-suited poll <span class="text-muted">in every situation</span></h2>
-                <p class="lead">It is important that the preference aggregation suits as much as possible to the need of the poll creator.
-                    Therefore Pnyx allows you to fully customize your poll.
-                    You can especially chose the type of preference asked to the voters or the output of the aggregation.</p>
+                <p class="lead">It is important that the preference aggregation suits the demands of the poll creator as much as possible.
+                    Therefore Pnyx allows you to customize your poll by choosing the type of preferences required from the voters as well as the type of output.</p>
                 <p class ="lead">Voters can either specify a unique most preferred alternative,
                    dichotomous preferences, a linear order of preferences,
                    a complete preorder or a complete binary relation.
-                   Pnyx can compute the best alternative, a lottery or rankings representating the collective preference</p>
-                <p><a href="{% url 'about' %}#poll" class="btn btn-primary pull-right" role="button">Learn more about Pnyx</a></p>
+                   Pnyx can compute the best alternative, a lottery, or a ranking that represents the collective preferences.</p>
+                <div class="col-md-12">
+					<a href="{% url 'about' %}#poll" class="btn btn-primary pull-right" role="button">Learn more about Pnyx</a></p>
+				</div>
             </div>
         </div>
 
@@ -109,10 +115,12 @@
         <div class="row featurette">
             <div class="col-md-9">
                 <h2 class="featurette-heading">Powerful <span class="text-muted">aggregation tool</span></h2>
-                <p class="lead">Pnyx is not only a user friendly application but also a powerful aggregation tool.
-                    To design Pnyx, we adopted a scientific approach based on the social choice theory.
-                    Thus we selected the choice rules aggregating the preferences to provide a meaningful method for every combination of input and output types.</p>
-                <p><a href="{% url 'about' %}#choice_rules" class="btn btn-primary pull-right" role="button">Learn more about the choice rules</a></p>
+                <p class="lead">Pnyx is not only a user-friendly application but also a powerful aggregation tool.
+                    Pnyx is based on insights from social choice theory and automatically selects the most appropriate choice rule depending on the combination of input and output types specified by the user.</p>
+					<p class="lead">Pnyx also supports periodic polls (for instance, lunch polls that are conducted daily before lunchtime), for which voters only need to update their preferences if desired.</p>
+                <div class="col-md-12">
+					<a href="{% url 'about' %}#choice_rules" class="btn btn-primary pull-right" role="button">Learn more about the choice rules</a></p>
+				</div>	
             </div>
             <div class="col-md-3">
                 <img class="featurette-image img-responsive" src= "{% static 'pnyx/images/powerful.png' %}"  alt="">

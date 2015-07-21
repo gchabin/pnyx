@@ -11,10 +11,9 @@
                 {% if private %}
                     <p> The links have been sent to the voters</p>
                 {% else %}
-                    <p id="text_to_copy">{{ protocol }}://{{ domain }}{%  url 'vote:get_ballot_view' pk 'public' %} </p>
+                    <p id="text_to_copy">{{ protocol }}://{{ domain }}{%  url 'vote:get_ballot_view' uuid 'public' %} </p>
                     <p> Here is the link to vote:
-                        <a type="button" class="navbar-link" href="{%  url 'vote:get_ballot_view' pk 'public' %}">link</a>
-                        , or <a id = "copy_button" type="button" class="navbar-link" >Copy to Clipboard</a>
+                        <a type="button" class="navbar-link" href="{%  url 'vote:get_ballot_view' uuid 'public' %}">link</a> (or <a id = "copy_button" type="button" class="navbar-link" >copy to clipboard)</a>
                     </p>
                 {%  endif %}
                 <a type="button" class="btn btn-primary pull-right" href="{%  url 'polls:manage_poll' %}">Manage existing polls</a>

@@ -32,7 +32,6 @@ lottery : list (Alternative name, p)
                             {% endfor %}
                         </ul>
                     </div>
-
                     <div class = "col-md-6">
                         <div class="progress">
                             {% for alternative_name , score_value in lottery %}
@@ -40,24 +39,23 @@ lottery : list (Alternative name, p)
                             {% endfor %}
                         </div>
                     </div>
+                    <div class="col-md-5 col-md-offset-1">
+                        <h3>Stats:</h3>
+                        <!-- {% if nb_voter != None %}
+                        	<p><strong>{{ nb_voter }}</strong> voter{{ nb_voter|pluralize }} voted</p>
+                        {% else %}
+                        	<p><strong>No</strong> voters have voted</p>
+                        {% endif %} -->
+                        {% if poll.private %}
+                            {% with total=poll.participant.all|length %}
+                                <p><strong>{{ total }}</strong> voter{{ total|pluralize }} registered</p>
+                            {% endwith %}
+                        {% endif %}
+                        <p><strong>Remaining time:</strong> {{ poll.get_remaining_time }} hours</p>
+                    </div>
                 </div>
                 {% if poll.tie_breaking_used == None %}
                     <p>Tie-breaking might have been necessary but the poll administrator has not had any influence on it.</p>
-                {% endif %}
-
-                {% if nb_voter != None %}
-                    <div class ='row'>
-                        <div class="col-md-5 col-md-offset-1">
-                            <h3>Stats:</h3>
-                            <p><strong>{{ nb_voter }}</strong>  voter{{ nb_voter|pluralize }} already voted</p>
-                            {% if poll.private %}
-                                {% with total=poll.participant.all|length %}
-                                    <p><strong>{{ total }}</strong> voter{{ total|pluralize }} registered</p>
-                                {% endwith %}
-                            {% endif %}
-                            <p><strong>Progress of the poll</strong>: {{ poll.get_progress }}%</p>
-                        </div>
-                    </div>
                 {% endif %}
             </div>
         </div>

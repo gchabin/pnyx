@@ -10,12 +10,17 @@
                     {% csrf_token %}
                     <h2 class="form-signin-heading">Create an account</h2>
                     {% if registration_form.errors %}
-                        <p>You did not fill the form correctly. Please try again.</p>
+                        <p>There was a problem processing your request: {{ registration_form.errors }}Please try again.</p>
                     {% endif %}
                     <input id="id_username" class="form-control" maxlength="254" placeholder="Username" name="username" type="text" required autofocus/>
                     <input id="id_email" class="form-control" maxlength="254" placeholder="Email" name="email" type="email" required autofocus/>
                     <input id="id_password1" class="form-control" name="password1" type="password" placeholder="Password" required/>
                     <input id="id_password2" class="form-control" name="password2" type="password" placeholder="Confirm password" required/>
+                    
+                    <br>
+                    {{ registration_form.captcha }}
+                    <br>
+                    
                     <button class="btn btn-lg btn-primary btn-block" type="submit">Create account</button>
                     <input type="hidden" name="next" value="{{ next }}" />
                 </form>

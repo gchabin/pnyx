@@ -14,20 +14,34 @@ BASE_DIR = os.path.dirname(os.path.dirname(__file__))
 TEMPLATE_DIRS = [os.path.join(BASE_DIR, 'templates')]
 STATICFILES_DIRS = [os.path.join(BASE_DIR, "static")]
 
-
-# Quick-start development settings - unsuitable for production
-# See https://docs.djangoproject.com/en/1.6/howto/deployment/checklist/
-
-# SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = '^l#hcga^%x7ls=5lbz@)5*)ket5*vp)!@kiqqqhzojr1*587ol'
+# SECRET items (must *NEVER* be deployed to any public repository)
+SECRET_KEY = '' # SECURITY WARNING: keep the secret key used in production secret!
+EMAIL_HOST_PASSWORD = ''
+RECAPTCHA_PRIVATE_KEY = ''
+REGISTRATION_RECAPTCHA_PRIVATE_KEY = ''
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = False
 
-TEMPLATE_DEBUG = True
+AUTHENTICATION_BACKENDS = (
+    'django.contrib.auth.backends.ModelBackend',
+)
 
-ALLOWED_HOSTS = []
+TEMPLATE_DEBUG = False
 
+# Production and online testing environments
+ALLOWED_HOSTS = ['pnyx.dss.in.tum.de']
+
+# SSL use only
+CSRF_COOKIE_SECURE = True
+SESSION_COOKIE_SECURE = True
+
+# ReCaptcha settings (for anything but user registration)
+RECAPTCHA_PUBLIC_KEY = '6Lc5hggTAAAAAEzzqZZNDjAPTD-D6sQVeM1zgDp8'
+RECAPTCHA_USE_SSL = True
+NOCAPTCHA = True
+# ReCaptcha custom settings (for user registration)
+REGISTRATION_RECAPTCHA_PUBLIC_KEY = '6Lc5hggTAAAAAEzzqZZNDjAPTD-D6sQVeM1zgDp8'
 
 # Application definition
 
@@ -42,7 +56,10 @@ INSTALLED_APPS = (
     'vote',
     'accounts',
     'about',
-    'django.contrib.formtools', #for form wizzard
+    'easy_timezones_custom',
+    'formtools', #for form wizard
+    'kronos',
+    'captcha',
 )
 
 MIDDLEWARE_CLASSES = (
@@ -52,6 +69,8 @@ MIDDLEWARE_CLASSES = (
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    #'easy_timezones.middleware.EasyTimezoneMiddleware',
+    'easy_timezones_custom.middleware.TimezoneMiddleware',
 )
 
 ROOT_URLCONF = 'pnyx.urls'
@@ -61,8 +80,7 @@ WSGI_APPLICATION = 'pnyx.wsgi.application'
 #Email settings
 EMAIL_HOST = 'smtp.gmail.com'
 EMAIL_PORT = "587"
-EMAIL_HOST_USER = 'pnyx.test@gmail.com'
-EMAIL_HOST_PASSWORD = 'pnyx12345'
+EMAIL_HOST_USER = 'team.pnyx@gmail.com'
 EMAIL_USE_TLS = True
 
 DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
@@ -82,25 +100,30 @@ DATABASES = {
 # https://docs.djangoproject.com/en/1.6/topics/i18n/
 
 LANGUAGE_CODE = 'en-us'
-TIME_ZONE = 'Europe/Berlin'
+TIME_ZONE = 'UTC'
 
 USE_I18N = True
 
 USE_L10N = True
 
 USE_TZ = True
+#IP geolocalisation
+GEOIP_DATABASE = os.path.join(BASE_DIR, "GeoLiteCity.dat")
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/1.6/howto/static-files/
 STATIC_URL = '/static/'
 
-if DEBUG:
-    MEDIA_URL = '/media/'
-    STATIC_ROOT = os.path.join(BASE_DIR, "static", "static-only")
-    MEDIA_ROOT = os.path.join(BASE_DIR, "static", "media ")
+MEDIA_URL = '/media/'
+STATIC_ROOT = os.path.join(BASE_DIR, "static", "static-only")
+MEDIA_ROOT = os.path.join(BASE_DIR, "static", "media ")
 
+#Performance optimizations
+CONN_MAX_AGE = 600
+TEMPLATE_LOADERS = ('django.template.loaders.filesystem.Loader',
+ 'django.template.loaders.app_directories.Loader')
 
-#Login URL for rederiction
+#Login URL for redirection
 LOGIN_URL = '/accounts/login/'
 LOGIN_REDIRECT_URL  = '/polls/'
 

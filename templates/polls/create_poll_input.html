@@ -9,43 +9,43 @@
 {% endblock %}
 
 {% block form_content %}
-    <p>Please select the <b>input</b> entered by each voter </p>
-    {% if form.input_type.errors %}{{ form.input_type.errors }}{% endif %}
+    <p>Please select the <b>input</b> to be entered by each voter </p>
+    {% if form.input_type.errors %}{{ form.input_type.errors }}{% endif %}	
     <div class="container" id="selectable">
-        <div  class="col-md-2 col-md-offset-1 ui-widget-content {% if form.input_type.value == 'Pf' %}ui-selected{%  endif %}"
+        <div class="col-md-2 col-md-offset-1 ui-widget-content {% if form.input_type.value == 'Pf' %}ui-selected{%  endif %}"
               id="Pf">
             <div class="thumbnail">
-                <img class='img-responsive' class='img-responsive' src= "{% static 'polls/images/input_most_pref.png' %}" height="150 " width="150" alt="">
+                <img class='img-responsive center-block' src= "{% static 'polls/images/input_most_pref.png' %}" height="150 " width="150" alt="">
             </div>
-            <p>Most preferred alternative</p>
+            <p style="text-align:center">Most preferred alternative</p>
         </div>
         <div  class="col-md-2 ui-widget-content {% if form.input_type.value == 'Di' %}ui-selected{%  endif %}"
               id="Di">
             <div class="thumbnail">
-                <img class='img-responsive' class='img-responsive' src= "{% static 'polls/images/input_dicot.png' %}" height="150 " width="150" alt="">
+                <img class='img-responsive center-block' src= "{% static 'polls/images/input_dicot.png' %}" height="150 " width="150" alt="">
             </div>
-            <p>Approved alternatives</p>
+            <p style="text-align:center">Approved alternatives</p>
         </div>
         <div  class="col-md-2 ui-widget-content  {% if form.input_type.value == 'Li' %}ui-selected{%  endif %}"
               id="Li">
             <div class="thumbnail">
-                <img class='img-responsive' class='img-responsive' src= "{% static 'polls/images/input_borda.png' %}" height="150 " width="150" alt="">
+                <img class='img-responsive center-block' src= "{% static 'polls/images/input_borda.png' %}" height="150 " width="150" alt="">
             </div>
-            <p> Rankings without ties</p>
+            <p style="text-align:center"> Rankings without ties</p>
         </div>
         <div  class="col-md-2 ui-widget-content  {% if form.input_type.value == 'Pd' %}ui-selected{%  endif %}"
               id="Pd">
             <div class="thumbnail">
-                <img class='img-responsive' class='img-responsive' src= "{% static 'polls/images/input_partial_borda.png' %}" height="150 " width="150" alt="">
+                <img class='img-responsive center-block' src= "{% static 'polls/images/input_partial_borda.png' %}" height="150 " width="150" alt="">
             </div>
-            <p> Rankings with ties</p>
+            <p style="text-align:center"> Rankings with ties</p>
         </div>
         <div  class="col-md-2 ui-widget-content {% if form.input_type.value == 'Bi' %}ui-selected{%  endif %}"
               id="Bi">
             <div class="thumbnail">
-                <img class='img-responsive' class='img-responsive' src= "{% static 'polls/images/input_complete.png' %}" height="150 " width="150" alt="">
+                <img class='img-responsive center-block' src= "{% static 'polls/images/input_complete.png' %}" height="150 " width="150" alt="">
             </div>
-            <p>Pairwise comparisons</p>
+            <p style="text-align:center">Pairwise comparisons</p>
         </div>
     </div>
     <div id="hidden-choice">
@@ -53,7 +53,8 @@
             <input type="hidden" name="1-input_type" value = "{{ form.input_type.value }}">
         {% endif %}
     </div>
-
+	<p class="text-center text-warning" id="most-pref-warning">This input type severely restricts how users can express their preferences. 
+		More expressive input types will allow Pnyx to use more sophisticated aggregation rules that ultimately result in more desirable outcomes.</p>
 {% endblock %}
 
 
@@ -62,10 +63,18 @@
     <script type="text/javascript" src="{% static 'jquery/js/jquery-ui-1.11.0.js' %}"></script>
     <script type="text/javascript" src="{% static 'jquery/js/jquery-ui-touch-punch.js' %}"></script>
     <script>
+		if (!$("#Pf").hasClass("ui-selected")) {
+			$("#most-pref-warning").hide(); //hide warning by default
+		}
         $(function() {
             $("#selectable").selectable({
-                selected: function(event, ui) { // prevent to select several alternative
-                    $(ui.selected).addClass("ui-selected").siblings().removeClass("ui-selected");
+                selected: function(event, ui) { 
+                    $(ui.selected).addClass("ui-selected").siblings().removeClass("ui-selected"); // prevent to select several alternative
+					if ($("#Pf").hasClass("ui-selected")) { // show warning if most-prefered is selected
+						$("#most-pref-warning").slideDown();
+					} else {
+						$("#most-pref-warning").slideUp();
+					}
                 },
 
                 stop: function() {

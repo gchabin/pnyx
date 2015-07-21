@@ -62,13 +62,13 @@
             //show or hide tie_breaking
             $('#id_3-tie_breaking').on('switchChange.bootstrapSwitch', function(event, state) {
                 if (state == true){
-                    $('.to-hide').show();
+                    $('.to-hide').slideDown();
                     $('#id_3-tie_breaking_rule').prop("disabled", false);
                     $('#id_3-label_tie_breaking_custom').show();
                     $('#id_3-label_tie_breaking_random').hide();
                 }
                 else{
-                    $('.to-hide').hide();
+                    $('.to-hide').slideUp();
                     $('#id_3-label_tie_breaking_custom').hide();
                     $('#id_3-label_tie_breaking_random').show();
                     $('#id_3-tie_breaking_rule').attr("disabled", 'disabled');

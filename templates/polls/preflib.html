@@ -9,7 +9,7 @@
     <div class="jumbotron">
         <div class="col-md-offset-1">
             <h1>Preference Profile of the poll: {{ poll.name }}</h1>
-            <p>Here is the preference profile under preflib standards</p>
+            <p>Here is the preference profile under <a href="http://www.preflib.org/">PrefLib</a> standards</p>
             <p>
                 {{ alternative_set|length }}<br>
                 {% for alt in alternative_set %}
@@ -20,11 +20,11 @@
                     {{ pref }}<br>
                 {% endfor %}
             </p>
-            <a type="button" class="btn btn-primary" href="{%  url 'polls:detail' poll.pk %}">Back poll's details</a>
+            <a type="button" class="btn btn-primary" href="{%  url 'polls:detail' poll.uuid %}">Back poll's details</a>
         </div>
     </div>
     <p>
-        The format for the election data is the folowing:
+        The format for the election data is the following:
     <p>Number of Candidates <br>
     1, Candidate Name <br>
     2, Candidate Name <br>

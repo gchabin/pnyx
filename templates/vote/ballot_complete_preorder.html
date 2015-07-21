@@ -30,8 +30,7 @@
         <div class="row">
             <div class="col-md-12">
                 <h1>{{ poll.name }}</h1>
-                <p>Specify your preferred order by dropping the alternatives in the right bucket.
-                    Ties are allowed and empty buckets are ignored</p>
+                <p>Specify your preferred order by dropping the alternatives in the buckets (ties are allowed). Empty buckets will be ignored.</p>
             </div>
         </div>
         <div class="jumbotron">
@@ -52,9 +51,9 @@
                         </div>
                     </div>
                 {% endif %}
-                <div class="row">
-                    <div class="col-md-12">
-                        <form class="form-horizontal" role = "form" action="{% url 'vote:vote' poll.id voter_uuid %}" method="post">
+				<form class="form-vertical" role = "form" action="{% url 'vote:vote' poll.uuid voter_uuid %}" method="post">
+					<div class="row">
+						<div class="col-md-5">
                             {% csrf_token %}
                             {% if error_message %}
                                 <div class="form-group">
@@ -68,7 +67,7 @@
                                         {% if ballot_data  %}
                                             {% for alternative in ballot_data|keyvalue:forloop.counter %}
                                                 <div class="row ui-state-default" id="{{ alternative.pk }}">
-                                                    <div class="col-sm-7 ui-widget-content">
+                                                    <div class="col-sm-11 ui-widget-content">
                                                         <p><span class="glyphicon glyphicon-resize-vertical"></span> <strong>{{ alternative.name }} {% if alternative.description %}: {{ alternative.description }}{% endif %}</strong></p>
                                                     </div>
                                                 </div>
@@ -76,13 +75,17 @@
                                         {%  endif %}
                                     </div>
                                 {% endfor  %}
+							</div>
+						</div>
+						<div class="col-md-5 col-md-offset-1">
+							<div class="form-group">
                                 {# init all alternatives in a "to rank" bucket #}
                                 <p><b>To rank </b></p>
                                 <div class="container connectedSortable sortable" id="sortable_to_rank">
                                     {% if not ballot_data  %}
                                         {% for alternative in poll.alternative_set.all %}
                                             <div class="row ui-state-default" id="{{ alternative.pk }}">
-                                                <div class="col-sm-7 ui-widget-content">
+                                                <div class="col-sm-11 ui-widget-content">
                                                     <p><span class="glyphicon glyphicon-resize-vertical"></span> <strong>{{ alternative.name }} {% if alternative.description %}: {{ alternative.description }}{% endif %}</strong></p>
                                                 </div>
                                             </div>
@@ -100,11 +103,11 @@
                                     {% endfor %}
                                 {%  endif %}
                             </div>
-                            <br>
-                            <input type="submit" class="btn btn-primary" value="Vote">
-                        </form>
-                    </div>
-                </div>
+						</div>
+					</div>
+					<br>
+					<input type="submit" class="btn btn-primary" value="Vote">
+				</form>
             </div>
         </div>
     </div>

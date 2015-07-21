@@ -1,0 +1,12 @@
+{% load i18n %}{% autoescape off %}Hello,
+
+You're receiving this email because the Pnyx poll "{{ poll.name }}" (created by {{admin}}) was closed. 
+
+Here is the link for the final results:
+{{ protocol }}://{{ domain }}{%  url 'vote:results' poll.uuid voter_uuid %}
+
+Thanks for using Pnyx!
+
+The Pnyx team
+
+{% endautoescape %}

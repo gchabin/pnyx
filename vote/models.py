@@ -3,7 +3,7 @@ from polls.models import *
 from django.contrib.auth.models import User
 from django import forms
 import datetime
-from django.forms.util import ErrorList
+from django.forms.utils import ErrorList
 from django.utils import timezone
 from django.core.urlresolvers import reverse_lazy
 from django.core.exceptions import ValidationError

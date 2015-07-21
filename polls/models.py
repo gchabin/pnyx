@@ -4,10 +4,12 @@ from django.contrib.auth.models import User
 from django import forms
 import datetime
 
-from django.forms.util import ErrorList
+from django.forms.utils import ErrorList
 from django.utils import timezone
 from django.core.urlresolvers import reverse_lazy
 from django.core.exceptions import ValidationError
+
+from captcha.fields import ReCaptchaField
 
 import re #regex
 import uuid
@@ -43,7 +45,7 @@ class MultipleChoiceFieldNoValidation(forms.MultipleChoiceField):
 
 ###########Model############
 '''this object represents any participant to a poll. The uuid will be the authentification key used in private links.
- If the voter is unregsiterd (public poll) the adress is default_voter@pnyx.com '''
+ If the voter is unregistered (public poll) the address is default_voter@pnyx.com '''
 class Voter(models.Model):
 
     email = models.EmailField(max_length=75, default = 'default_voter@pnyx.com')
@@ -55,14 +57,14 @@ class Voter(models.Model):
     def __str__(self):
         return self.email
 
-'''This object represents the poll ibject and its propertis.'''
+'''This object represents the poll object and its properties.'''
 class Poll(models.Model):
 
     name = models.CharField(max_length=60)
     question = models.CharField(max_length=200)
     description = models.TextField(null = True, blank = True)
 
-    private = models.BooleanField(default=False)
+    private = models.BooleanField(default=True)
     change_vote =  models.BooleanField(default=False)
 
     temporary_result = models.BooleanField(default=False)
@@ -79,7 +81,7 @@ class Poll(models.Model):
     recursive_poll = models.BooleanField(default=False)
     recursive_period = models.PositiveIntegerField(blank = True , null = True)
 
-    participant = models.ManyToManyField(Voter, null = True, blank = True)
+    participant = models.ManyToManyField(Voter, blank = True)
     admin = models.ForeignKey(User)  #creator of the poll
     uuid = models.CharField(max_length = 36, default = uuid.uuid4, editable = False, unique = True) #not used but would allow to make links more complex (wiyh the uuid instead of id
 
@@ -94,7 +96,7 @@ class Poll(models.Model):
         return self.name
 
     def was_published_recently(self):
-        return self.ctreation_date >= timezone.now() - datetime.timedelta(days=1)
+        return self.creation_date >= timezone.now() - datetime.timedelta(days=1)
 
     def get_progress(self):
         if self.opening_date >= timezone.now() :
@@ -105,6 +107,13 @@ class Poll(models.Model):
             td1 = timezone.now() - self.opening_date
             td2 = self.closing_date - self.opening_date
             return int(100*td1.total_seconds() / td2.total_seconds())
+        
+    def get_remaining_time(self):
+        if self.closing_date <= timezone.now() :
+            td = datetime.timedelta(seconds=0)
+        else:
+            td = self.closing_date - timezone.now()
+        return ':'.join(str(td).split(':')[:2])
 
     def get_choice_rule(self):
 
@@ -127,9 +136,9 @@ class Poll(models.Model):
 
         elif self.output_type == 'L':
             if self.input_type == 'Pf':
-                choice_rule = 'random_dictatorship'
+                choice_rule = 'uniform_plurality_lottery'
             elif self.input_type == 'Di':
-                choice_rule = 'nash'
+                choice_rule = 'uniform_approval_lottery'
             elif self.input_type == 'Li' or self.input_type == 'Pd' or self.input_type == 'Bi':
                 choice_rule = 'maximal_lottery'
 
@@ -173,8 +182,8 @@ class Alternative(models.Model):
     description = models.TextField(null = True, blank = True)
     poll = models.ForeignKey(Poll)
     priority_rank = models.IntegerField( null = True, blank = True)
-    final_rank = models.FloatField(null = True, blank = True) #curently storing the final rank,
-    # we cannot store the score because of te ties
+    final_rank = models.FloatField(null = True, blank = True) #currently storing the final rank,
+    # we cannot store the score because of the ties
 
     def __unicode__(self):
         return self.name
@@ -186,7 +195,7 @@ class Alternative(models.Model):
 
 '''this form is part of the creation process. It contains the general settings about the poll to create'''
 class CreatePollGeneralSettingForm(forms.Form):
-
+    
     poll_name = forms.CharField(max_length=100)
     poll_question = forms.CharField(max_length=100)
     poll_description = forms.CharField(widget=forms.Textarea, required=False)
@@ -205,7 +214,7 @@ class CreatePollGeneralSettingForm(forms.Form):
 
         # run the parent validation first
         valid = super(CreatePollGeneralSettingForm, self).is_valid()
-        #check in compatibilty of the dates
+        #check in compatibility of the dates
         if valid and not timezone.now() - self.cleaned_data["opening_date"] < datetime.timedelta( minutes = 30):
             # 30 minutes tolerance allowed
             self._errors["opening_date"] = ErrorList([u"The opening date is already passed"])
@@ -257,7 +266,7 @@ class CreatePollAlternativeForm(forms.Form):
                     self._errors["alternative"] = ErrorList([u"An alternative name has to be smaller than 100 characters"])
                     valid = False
                 elif not val[0]:
-                    self._errors["alternative"] = ErrorList([u"Alterninative names cannot be empty, the last line may be empty"])
+                    self._errors["alternative"] = ErrorList([u"Alternative names cannot be empty, the last line may be empty"])
                     valid = False
                 else:
                     alt_name_list.append(val[0])
@@ -265,11 +274,11 @@ class CreatePollAlternativeForm(forms.Form):
             self._errors["alternative"] = ErrorList([u"Several alternatives cannot share the same name within a poll"])
             valid = False
         if valid and self.cleaned_data['tie_breaking']:
-            # check if repeted value
+            # check if repeated value
             alt_priority_list = re.split(' *> *', self.cleaned_data['tie_breaking_rule'])
             if sorted(alt_priority_list) != sorted(alt_name_list):
                 logger.debug(str(alt_priority_list) + "////" +str(alt_name_list))
-                self._errors["tie_breaking_rule"] = ErrorList([u"Not all the altrenatives are specified"])
+                self._errors["tie_breaking_rule"] = ErrorList([u"Not all the alternatives are specified"])
                 valid = False
         return valid
 
@@ -307,7 +316,7 @@ class SetUpOpenedPollForm(forms.Form):
 
     def is_valid(self):
         valid = super(SetUpOpenedPollForm, self).is_valid()
-        #check in compatibilty of the dates
+        #check in compatibility of the dates
         if valid and not self.cleaned_data["closing_date"] > timezone.now():
             self._errors["closing_date"] = ErrorList([u"The closing date already passed"])
             valid = False
@@ -358,7 +367,7 @@ class SetUpUpcomingPollForm(forms.Form):
         # run the parent validation first
         valid = super(SetUpUpcomingPollForm, self).is_valid()
 
-        #check in compatibilty of the dates
+        #check in compatibility of the dates
         if valid and not timezone.now() - self.cleaned_data["opening_date"] < datetime.timedelta( minutes = 5):
             #tolerance of 5 minutes
             self._errors["opening_date"] = ErrorList([u"The opening date already passed"])
@@ -411,3 +420,8 @@ class SetUpUpcomingPollForm(forms.Form):
 class EmailParticipantForm(forms.Form):
         subject = forms.CharField()
         message = forms.CharField(widget = forms.Textarea)
+        captcha = ReCaptchaField()
+
+class SendLinkParticipantForm(forms.Form):
+    notify_all = forms.BooleanField(required = False)
+    participant_to_notify = MultipleChoiceFieldNoValidation(required = False)

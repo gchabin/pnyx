@@ -12,13 +12,13 @@
         <h1 class="featurette-heading text-muted">Overview</h1>
     </div>
     <p class ="lead">
-		Pnyx is a user-friendly and yet powerful application that supports the whole process of collective decision making (from setting up a poll/election to eliciting individual preferences to aggregating them in a reasonable way to the communication of outcomes to participants). Pnyx takes into account the insights that have been generated in social choice theory (including new insights regarding probabilistic methods) and does so in a highly user-friendly way without expecting knowledge about the properties of the underlying mechanisms.
+		Pnyx is a user-friendly yet powerful application that supports the whole process of collective decision making (from setting up a poll/election to eliciting individual preferences to aggregating them in a reasonable way to the communication of outcomes to participants). Pnyx is based on insights that have been generated in social choice theory, but does not expect the user to possess any knowledge about the underlying aggregation rules.
     </p>	
     <div class="row featurette">
         <h1 class="featurette-heading text-muted">The features of a poll</h1>
     </div>
     <p class ="lead">
-        Pnyx polls have several functional features to suit a variety of different use case scenarios while not overwhelming the user with a large amount of customization options.
+        Pnyx polls have several functional features to suit a variety of different use case scenarios while not overwhelming the user with too many customization options.
     </p>
     <div class="row featurette">
         <div class="col-md-12">
@@ -58,10 +58,10 @@
                 The opening time of the poll. No one will be able to cast a vote before this time.
             </p>
             <p class ="lead"><span class=" h3 featurette-heading">Closing time: </span>
-                The closing time of the poll. No one will be able to cast a vote after this time. The final results are accessible only after this time has passed.
+                The closing time of the poll. No one will be able to cast a vote after this time. The final results are accessible only after the closing time has passed.
             </p>
             <p class ="lead"><span class=" h3 featurette-heading">Periodic poll: </span>
-                If set, the poll will be re-run regularly without the need to explicitly recreate it. Unless participants change their votes, their previous votes will be considered as still valid. Therefore, this feature mostly makes sense for private polls where the voters can change their votes.
+                If set, the poll will be re-run regularly without the need to explicitly recreate it. Unless participants change their votes, their previous votes will be considered as still valid. Therefore, this feature mostly makes sense for private polls where the voters can change their votes over time.
             </p>
             <p class ="lead"><span class=" h3 featurette-heading">Period: </span>
             	Periodicity of the poll.  If the period of the poll is set to <em>x</em> days, the poll will be repeated every <em>x</em> days.
@@ -80,14 +80,14 @@
             <h2 class="featurette-heading text-muted">Alternatives</h2>
             <p class ="lead"><span class=" h3 featurette-heading">Alternative: </span>Each poll has to specify a set of feasible alternatives. Each alternative is specified by its name and an optional description.
             </p>
-            <p class ="lead"><span class=" h3 featurette-heading">Tie breaking rule: </span>If required, tie breaking is performed by pnyx according to a specified order over the alternatives. It can be defined randomly or manually by the poll creator. This tie breaking is used for every choice rule except Nash's rule, Maximal lotteries and Kemeny's rule. For Nash's rule and Kemeny's rule the tie breaking is performed during the computation by the LP solver. For maximal lotteries, the barycenter of the space of all maximal lotteries is approximated.</p>
+            <p class ="lead"><span class=" h3 featurette-heading">Tie breaking rule: </span>If required, tie breaking is performed by Pnyx according to a specified order over the alternatives. It can be defined randomly or manually by the poll creator. This tie breaking is used for every choice rule except Nash's rule, Maximal lotteries and Kemeny's rule. For Nash's rule and Kemeny's rule the tie breaking is performed during the computation by the LP solver. For maximal lotteries, the barycenter of the space of all maximal lotteries is approximated.</p>
         </div>
     </div>
     <div class="row featurette">
         <div class="col-md-12">
             <h2 class="featurette-heading text-muted">Participants</h2>
             <p class ="lead">
-                For private polls, each participant is invited by an email from the Pnyx system. For public polls, this is optional (alternatively the poll creator can share the public link to the poll). Pnyx furthermore provides a built-in interface for the poll admin to send emails to all participants at any time.
+                For private polls, each participant is invited via email from Pnyx. For public polls, this is optional (alternatively the poll creator can share the public link to the poll). Pnyx furthermore provides a built-in interface for the poll admin to send emails to all participants at any time.
             </p>
             <h3> The email addresses entered will not be shared with third parties or otherwise be used for commercial purposes.<h3>
         </div>
@@ -102,8 +102,7 @@
         </div>
         <div class="col-md-9">
             <p class ="lead"><span class=" h3 featurette-heading">Most preferred alternative: </span>
-                The voter can only select a unique alternative among all candidates. 
-				This is how in practice elections are often carried out.
+                The voter can only select a unique most-preferred alternative among all candidates. Due to the severe restrictedness of this type of input, it is recommended to at least allow voters to approve an arbitrary number of alternatives (see below).
             </p>
         </div>
     </div>
@@ -113,8 +112,7 @@
         </div>
         <div class="col-md-9">
             <p class ="lead"><span class=" h3 featurette-heading">Approved alternatives: </span>
-                The voter may approve a <em>set</em> of alternatives among the candidates. 
-				The technical term are dichotomous preferences. There is no distinction between alternatives within the set of approved or non-approved alternatives, respectively.
+                The voter may approve an arbitrary number of alternatives and automatically disapproves the remaining ones. There is no distinction between alternatives within the set of approved or non-approved alternatives, respectively. Such preferences are sometimes called dichotomous preferences.
             </p>
         </div>
     </div>
@@ -125,7 +123,7 @@
         <div class="col-md-9">
             <p class ="lead"><span class=" h3 featurette-heading">Rankings without ties: </span>
                 Each voter has to rank all alternatives and the ballot may not contain ties between alternatives.
-				Such preferences are also called linear.
+				Such preferences are sometimes called strict total orders or linear preferences.
             </p>
         </div>
     </div>
@@ -136,7 +134,7 @@
         <div class="col-md-9">
             <p class ="lead"><span class=" h3 featurette-heading">Rankings with ties: </span>
                 This input format is a generalization of "rankings without ties" where now ties between alternatives are allowed.
-                One speaks of complete preorders or bucket preferences.
+                Such preferences are sometimes called complete preorders or bucket preferences.
             </p>
         </div>
     </div>
@@ -146,13 +144,13 @@
         </div>
         <div class="col-md-9">
             <p class ="lead"><span class=" h3 featurette-heading">Pairwise comparisons: </span>
-                This is the most general form of preferences that are supported by Pnyx. The voter may specify each individual pairwise comparison among alternatives.
+                This is the most general form of preferences supported by Pnyx. The voter may specify each individual pairwise comparison among alternatives.
                 By default, indifference between any pair is assumed. Note that transitivity of the preferences is no longer required.
             </p>
         </div>
     </div>
     <hr id = "output" class="featurette-divider">
-    <h1 class="featurette-heading text-muted">Output types (collective preferences)</h1>
+    <h1 class="featurette-heading text-muted">Output types (collective choices)</h1>
     <div class="row featurette">
         <div class="col-md-12">
             <p class ="lead"><span class=" h3 featurette-heading">Unique winner: </span>
@@ -171,8 +169,8 @@
     </div>
     <div class="row featurette">
         <div class="col-md-12">
-            <p class ="lead"><span class=" h3 featurette-heading"> Rankings without ties: </span>
-                The collective preferences are provided by a complete ranking of all alternative without ties. 
+            <p class ="lead"><span class=" h3 featurette-heading">Rankings without ties: </span>
+                The collective preferences are provided in the form of a complete ranking of all alternative without ties. 
 				This can also be interpreted as a collective order of preference over the alternatives. 
         </div>
     </div>
@@ -188,15 +186,15 @@
         </div>
     </div>
     <hr id = "choice_rules" class="featurette-divider">
-    <h1 class="featurette-heading text-muted">Aggregation rules:</h1>
+    <h1 class="featurette-heading text-muted">Aggregation rules</h1>
     <div class="row featurette">
         <div class="col-md-12">
             <p class ="lead">
-                After successful collection of the preferences of all voters, those preferences are aggregated into a single collective preference of the group.
+                After the successful collection of preferences of all voters, the preferences are aggregated into a single collective preference of the group.
                 For this an aggregation rule depending on the desired input &amp; output types is applied.
             </p>
             <p class ="lead">
-                The Pnyx project aims to keep things simple for the user, why the aggregation rules to be used have been preselected based on scientific insights.
+                Since Pnyx aims to keep things simple for the user, the aggregation rules to be used have been preselected based on scientific insights.
             </p>
             <p class ="lead">
                 The following table gives an overview of the implemented aggregation rules and for which combination of input and output which rule is applied.</p>
@@ -207,36 +205,30 @@
         <div class="col-md-10 col-md-offset-1">
             <table class="table table-hover lead">
                 <tr>
-                    <th></th>
-                    <th>Most preferred alternative</th>
-                    <th>Approved alternatives</th>
-                    <th>Linear rankins</th>
+                    <th class="col-md-2"></th>
+                    <th class="col-md-3">Most preferred alternative</th>
+                    <th class="col-md-3">Approved alternatives</th>
+                    <th class="col-md-2">Rankings without ties</th>
                     <th>Rankings with ties</th>
                     <th>Pairwise comparisons</th>
                 </tr>
                 <tr>
                     <th>Unique winner</th>
-                    <td>Plurality rule</td>
-                    <td>Approval voting</td>
-                    <td>Borda's rule</td>
-                    <td>Bucket Borda's rule</td>
-                    <td>Young's generalization of Borda's rule</td>
+                    <td>Borda’s rule<br>(= plurality winner)</td>
+                    <td>Borda’s rule<br>(= approval winner)</td>
+                    <td style="letter-spacing: 6px;" colspan="3" class="text-center">Borda's rule</td>
                 </tr>
                 <tr>
                     <th>Lottery</th>
-                    <td>Random dictatorship</td>
-                    <td>Nash's rule</td>
-                    <td>Maximal lotteries</td>
-                    <td>Maximal lotteries</td>
-                    <td>Maximal lotteries</td>
+                    <td>Fishburn's rule<br>(= plurality lottery)</td>
+                    <td>Fishburn's rule<br>(= approval lottery)</td>
+                    <td style="letter-spacing: 6px;" colspan="3" class="text-center spaced">Fishburn's rule</td>
                 </tr>
                 <tr>
                     <th>Ranking without ties</th>
-                    <td>Plurality scores</td>
-                    <td>Approval voting scores</td>
-                    <td>Kemeny's rule</td>
-                    <td>Kemeny's rule</td>
-                    <td>Kemeny's rule</td>
+                    <td>Kemeny's rule<br>(= plurality ranking)</td>
+                    <td>Kemeny's rule<br>(= approval ranking)</td>
+                    <td style="letter-spacing: 6px;" colspan="3" class="text-center spaced">Kemeny's rule</td>
                 </tr>
             </table>
         </div>
@@ -244,64 +236,65 @@
     <div class="row featurette">
         <div class="col-md-12">
             <br>
-            <p class ="lead"><span class=" h3 featurette-heading">Plurality rule: </span>
-                In this voting system the winner is the alternative with the most votes (recall that each voter may only vote for a single alternative); there is no requirement that the winner gains an absolute majority of votes. 
-            </p>
-            <p class ="lead"><span class=" h3 featurette-heading">Approval voting: </span>
-                Each voter may "approve" (i.e., select) as many alternatives as desired. The winner is the alternatives with most approval votes.
-            </p>
             <p class ="lead"><span class=" h3 featurette-heading">Borda's rule: </span>
-                Borda's rule is a scoring rule where each alternative receives from 0 to <em>m</em> - 1 points from each voter (depending on the position the alternative is ranked in), where <em>m</em> is the total number of alternatives. The alternative with the highest cumulative score is selected.
+				Borda’s rule is a simple scoring rule that is particularly intuitive when preferences are rankings without ties [3]: each alternative receives from 0 to <em>m</em> - 1 points from each voter (depending on the position the alternative is ranked in), where <em>m</em> is the total number of alternatives. The alternative with the highest accumulated score wins. For more general cases, we consider a natural extension of Borda’s rule to arbitrary binary relations where the score each voter assigned to alternative <em>x</em> is the number of alternatives that <em>x</em> is preferred to minus the number of alternatives that are preferred to <em>x</em>. (see also <a href="http://en.wikipedia.org/wiki/Borda_count">Wikipedia</a>)
             </p>
-            <p class ="lead"><span class=" h3 featurette-heading">Bucket Borda's rule: </span>
-                Bucket Borda's rule is an extension of Borda's rule allowing for ties in voters' preferences. Among a set of tied alternatives each alternative receives the average score of all possible orderings of those alternatives. In total each voter still gets to assign the same number of points (regardless of how many ties he specifies).
-            </p>
-            <p class ="lead"><span class=" h3 featurette-heading">Young's generalization of Borda's rule: </span>
-                This rule generalizes both Borda's as well as Bucket Borda's rule and only requires pairwise comparisons of alternatives. 
-                For each voter, each alternative receives 1 point for every alternative it dominates and loses 1 point for each alternative which it is dominated by.
-            </p>
-            <p class ="lead"><span class=" h3 featurette-heading">Random dictatorship: </span>
-                This lottery corresponds to selecting a single voter at random and letting him choose among the alternatives. It has the nice property that "each vote counts".
-            </p>
-            <p class ="lead"><span class=" h3 featurette-heading">Nash's rule: </span>
-                Nash's rule maximizes a convex collective utility function and guarantees to every non-indifferent voter a lower bound of satisfaction. For more details please refer to <a type="button" class="navbar-link"
-                   href="http://www.ruf.rice.edu/~econ/papers/2003papers/09bogomolnaia.pdf">
-                    A. Bogomolnaia, H. Moulin, and R. Stong. Collective choice under dichotomous preferences. Journal of Economic Theory, 122(2):165–184, 2005.</a>
-            </p>
-            <p class ="lead"><span class=" h3 featurette-heading">Maximal lotteries: </span> 
-				Maximal lotteries are an advanced aggregation method equivalent to mixed maximin strategies of the symmetric zero-sum game given by the pairwise majority margins. Whenever there is an alternative that is preferred to any other alternative by some majority of voters (a so-called Condorcet winner), the lottery that assigns probability one to this alternative is a maximal lottery. This is in contrast to random dictatorship, which only returns a lottery with support one if all voters unanimously favor the same alternative. At the same time, maximal lotteries satisfy consistency with respect to variable electorates which has been identified as the defining property of Borda’s scoring rule.
-                For more detail please refer to 
-                <a type="button" class="navbar-link"
-                   href="http://dss.in.tum.de/files/brandt-research/stratlott.pdf">
-                   H. Aziz, F. Brandt, and M. Brill. On the tradeoff between economic efficiency and strategyproofness in randomized social choice. In Proceedings of the 12th International Conference on Autonomous Agents and Multi-Agent Systems (AAMAS), pages 455–462. IFAAMAS, 2013.
-                </a>
-            </p>
-            <p class ="lead"><span class=" h3 featurette-heading">Plurality scores: </span>
-                This rule yields a linear ranking based on plurality scores (see above).
-            </p>
-            <p class ="lead"><span class=" h3 featurette-heading">Approval voting scores: </span>
-                This rule yields a linear ranking based on approval scores (see above).
+            <p class ="lead"><span class=" h3 featurette-heading">Fishburn's rule: </span> 
+				The rule that we call Fishburn’s rule was first considered by Kreweras [7] and independently rediscovered and studied in much more detail by Fishburn [5]. The rule returns a so-called maximal lottery, i.e., a lottery over the alternatives that is weakly preferred to any other lottery. Maximal lotteries are equivalent to mixed maximin strategies (or Nash equilibria) of the symmetric zero-sum game given by the pairwise majority margins, which allows us to use linear programming for their computation (see, e.g., Algorithm 1 by Brandt and Fischer [2]). For more details, we refer to Brandl et al. [1]. (see also <a class="text-muted" href="http://en.wikipedia.org/wiki/Maximal_lotteries">Wikipedia</a>)
             </p>
             <p class ="lead"><span class=" h3 featurette-heading">Kemeny's rule: </span>
-                This rule yields a linear ranking that agrees with as many voters' pairwise preferences as possible.
+                Kemeny’s rule [6] is an aggregation rule that returns a ranking of the alternatives that maximizes pairwise agreement, i.e., a ranking in which as many pairwise comparisons as possible coincide with the preferences of the voters. Alternatively, Kemeny’s rule can be characterized using maximum likelihood estimation [8] or a consistency property for electorates of variable size [9]. We implemented the NP-hard problem of finding a Kemeny ranking via integer programming (following a formulation of Conitzer et al. [4]). (see also <a href="http://en.wikipedia.org/wiki/Kemeny-Young_method">Wikipedia</a>)
             </p>
+            <p class ="lead"><span class=" h3 featurette-heading">Plurality scores: </span>
+                The plurality score of an alternative simply denotes the number of votes (recall that in this column each voter may only vote for a single alternative) an alternative receives. (see also <a href="http://en.wikipedia.org/wiki/Plurality_voting_system">Wikipedia</a>)
+            </p>
+            <p class ="lead"><span class=" h3 featurette-heading">Approval voting scores: </span>
+                Each voter may "approve" (i.e., select) as many alternatives as desired. The approval score of an alternative then is the cumulative number of approval votes it receives. (see also <a href="http://en.wikipedia.org/wiki/Approval_voting">Wikipedia</a>)
+            </p>
+	        <p class="body text-muted"><span class="lead featurette-heading">References: </span>
+				<br>
+			[1] F. Brandl, F. Brandt, and H. G. Seedig. Consistent probabilistic social choice. 2015. Working paper.<br>
+			[2] F. Brandt and F. Fischer. Computing the minimal covering set. Mathematical Social Sciences, 56(2):254–268, 2008.<br>
+			[3] C. de Borda. Memoire sur les Elections au Scrutin. Histoire de l’Academie Royale des Sciences, 1784.<br>
+			[4] V. Conitzer, A. Davenport, and J. Kalagnanam. Improved bounds for computing Kemeny rankings. In Proceedings of the 21st National Conference on Artificial Intelligence (AAAI), pages 620–627. AAAI Press, 2006.<br>
+			[5] P. C. Fishburn. Probabilistic social choice based on simple voting comparisons. Review of Economic Studies, 51(4):683–692, 1984.<br>
+			[6] J. G. Kemeny. Mathematics without numbers. Daedalus, 88:577–591, 1959.<br>
+			[7] G. Kreweras. Aggregation of preference orderings. In Mathematics and Social Sciences I: Proceedings of the seminars of Menthon-Saint-Bernard, France (1–27 July 1960) and of Gösing, Austria (3–27 July 1962), pages 73–79, 1965.<br>
+			[8] H. P. Young. Optimal voting rules. Journal of Economic Perspectives, 9(1):51–64, 1995.<br>
+			[9] H. P. Young and A. Levenglick. A consistent extension of Condorcet’s election principle. SIAM Journal on Applied Mathematics, 35(2):285–300, 1978.
+			</p>
         </div>
     </div>
     <hr id = "team" class="featurette-divider">
     <div class="row featurette">
-        <h1 class="featurette-heading text-muted">About us:</h1>
+        <h1 class="featurette-heading text-muted">About us</h1>
     </div>
     <div class="row featurette">
         <div class="col-md-12">
             <p class ="lead">
-                This project is run by the chair of <a type="button" class="navbar-link" href="http://dss.in.tum.de/">Decision Sciences &amp; Systems</a> at <a type="button" class="navbar-link" href="http://www.tum.de/">Technische Universität München</a>:
+				Pnyx will be demonstrated at <a href="http://aamas2015.com/">AAMAS 2015</a> in Istanbul and there is a short demonstration paper to be found <a href="http://dss.in.tum.de/files/brandt-research/pnyxdemo.pdf">here (draft)</a>.
+			</p>
+			<p class ="lead">
+                This project is run by the chair for <a href="http://dss.in.tum.de/">Decision Sciences &amp; Systems</a> at <a href="http://www.tum.de/">Technische Universität München</a>:
             </p>
-            <ul class="list-unstyled lead">
-                <li><a type="button" class="navbar-link" href="http://dss.in.tum.de/staff/brandt.html">Prof. Dr. Felix Brandt</a> (<a type="button" class="navbar-link" href="http://www.tum.de/">TUM</a>)</li>
-                <li><a type="button" class="navbar-link" href="http://dss.in.tum.de/staff/christian-geist.html">Christian Geist, M.Sc.</a> (<a type="button" class="navbar-link" href="http://www.tum.de/">TUM</a>)</li>
-                <li>Guillaume Chabin (<a type="button" class="navbar-link" href="http://www.tum.de/">TUM</a> &amp; <a type="button" class="navbar-link" href="http://www.telecom-paristech.fr/eng">Telecom ParisTech</a>)</li>
-            </ul>
             <!-- <a class="btn btn-default btn-lg pull-right" href="mailto:team.pnyx@gmail.com">Contact us</a> -->
         </div>
     </div>
+        <div class="col-md-4 text-center">
+            <img class="img-thumbnail" src="{% static 'about/brandt.png' %}" style="width: 133px; height: 200px;">
+                <h3 class='featurette-heading'><a href="http://dss.in.tum.de/staff/brandt.html">Prof. Dr. Felix Brandt</a></h3>
+                <p ><a href="http://in.tum.de/">Technische Universität München</a></p>
+                </div><!-- /.col-md-4 -->
+<div class="col-md-4 text-center">
+    <img class = 'img-thumbnail'src="{% static 'about/geist.png' %}"  style="width: 133px; height: 200px;">
+        <h3 class="featurette-heading"><a href="http://dss.in.tum.de/staff/geist">Christian Geist, M.Sc.</a></h3>
+        <p ><a href="http://in.tum.de/">Technische Universität München</a></p>
+        </div><!-- /.col-md-4 -->
+<div class="col-md-4 text-center">
+    <img  class = 'img-thumbnail' src="{% static 'about/chabin.png' %}" style="width: 133px; height: 200px;">
+        <h3 class="featurette-heading">Guillaume Chabin</h3>
+        <p ><a href="http://in.tum.de/">Technische Universität München</a></p>
+        <p ><a href="http://www.telecom-paristech.fr/eng">Telecom ParisTech</a></p>
+        </div><!-- /.col-md-4 -->
+</div><!-- /.row -->
 {%  endblock %}

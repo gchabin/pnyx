@@ -1,5 +1,7 @@
 {% extends "polls/wizard_create_poll.html" %}
 {% load staticfiles %}
+{% load tz  %}
+{% get_current_timezone as TIME_ZONE %}
 
 
 {% block form_content %}
@@ -29,7 +31,7 @@
     </div>
 
     <div class="form-group">
-        <label>Visibility of the poll:</label>
+        <label>Visibility of the poll</label>
         {% if form.poll_private.errors %}{{ form.poll_private.errors }}{% endif %}
 
         <div class="checkbox">
@@ -38,8 +40,8 @@
                     {% if form.poll_private.value %}
                    checked="{{ form.poll_private.value }}"
                     {% endif %}>
-            <label id="id_0-label-poll_private" for="id_0-poll_private">&nbsp; Only <strong>registered voters</strong> can participate</label>
-            <label id="id_0-label-poll_public" for="id_0-poll_private"><strong>&nbsp; Everyone</strong> can vote</label>
+            <label id="id_0-label-poll_private" for="id_0-poll_private">&nbsp; Only <strong>invited participants</strong> can cast a vote</label>
+            <label id="id_0-label-poll_public" for="id_0-poll_private"><strong>&nbsp; Anyone</strong> can vote</label>
         </div>
     </div>
     <div class="form-group to-hide-private">
@@ -63,15 +65,22 @@
         </div>
     </div>
     <label class="control-label" for="id_0-opening_date">Timeframe of the poll</label>
-    <div class="input-group col-md-6"> <span class="input-group-addon">Opening date</span>
-        <input type="datetime"  id="id_0-opening_date" name="0-opening_date" class="form-control"
-               value = "{{ form.opening_date.value  }}">
+    <div class = "form-group">
+        <div class="input-group col-md-6"> <span class="input-group-addon">Opening</span>
+            <input type="datetime"  id="id_0-opening_date" name="0-opening_date" class="form-control"
+                   value = "{{ form.opening_date.value  }}">
+        </div>
+        <div class="col-md-12"><label>Time zone: {{ TIME_ZONE }}</label></div>
+        {% if form.opening_date.errors %}{{ form.opening_date.errors }}{% endif %}
     </div>
-    {% if form.opening_date.errors %}{{ form.opening_date.errors }}{% endif %}
+
     <br>
-    <div class="input-group col-md-6"> <span class="input-group-addon">Closing date &nbsp;</span>
-        <input type="datetime" id="id_0-closing_date" name="0-closing_date" class="form-control"
-               value = "{{ form.closing_date.value  }}">
+    <div class = "form-group">
+        <div class="input-group col-md-6"> <span class="input-group-addon">Closing</span>
+            <input type="datetime" id="id_0-closing_date" name="0-closing_date" class="form-control"
+                   value = "{{ form.closing_date.value  }}">
+        </div>
+        <div class="col-md-12"><label>Time zone: {{ TIME_ZONE }}</label></div>
         {% if form.closing_date.errors %}{{ form.closing_date.errors }}{% endif %}
     </div>
     <br>
@@ -99,7 +108,7 @@
                     {% endif %}>
         </div>
         <p class="help-block">If the period is 3 days, the timeframe of the poll will be repeated every 3 days.
-            By default the votes are conserved from one iteration to another</p>
+            By default the votes are conserved from one iteration to another.</p>
     </div>
 
 
@@ -144,12 +153,12 @@
               //show or hide the text area on click
             $('#id_0-recursive_poll').on('switchChange.bootstrapSwitch', function(event, state) {
                 if (state == true){
-                    $('.to-hide-recursive-poll').show();
+                    $('.to-hide-recursive-poll').slideDown();
                     $('#id_0-label-recursive_poll').show();
                     $('#id_0-label-unique_poll').hide();
                 } else{
                     $('#id_0-recursive_period').prop("value", null);
-                    $('.to-hide-recursive-poll').hide();
+                    $('.to-hide-recursive-poll').slideUp();
                     $('#id_0-label-recursive_poll').hide();
                     $('#id_0-label-unique_poll').show();
                 }
@@ -158,14 +167,14 @@
             //show or hide change vote switch based on visibility
             $('#id_0-poll_private').on('switchChange.bootstrapSwitch', function(event, state) {
                 if (state == true){
-                    $('.to-hide-private').show();
+                    $('.to-hide-private').slideDown();
                     $('#id_0-label-poll_private').show();
                     $('#id_0-label-poll_public').hide();
                 }
                 else{
                     $('#id_0-poll_change_vote').bootstrapSwitch('state', false , true);
                     $('#id_0-poll_change_vote').prop("checked", false);
-                    $('.to-hide-private').hide();
+                    $('.to-hide-private').slideUp();
                     $('#id_0-label-poll_private').hide();
                     $('#id_0-label-poll_public').show();
                 }

@@ -29,7 +29,7 @@
         <div class="row">
             <div class="col-md-12">
                 <h1>{{ poll.name }}</h1>
-                <p>Enter your pairwise preferences by dropping the token on the side of the preferred alternative</p>
+                <p>Enter your pairwise preferences by moving the slider towards your preferred alternatives. If you are indifferent, leave the slider in the middle position.</p>
             </div>
         </div>
         <div class="jumbotron">
@@ -52,7 +52,7 @@
                 {% endif %}
                 <div class="row">
                     <div class="col-md-12">
-                        <form class="form-horizontal" role = "form" action="{% url 'vote:vote' poll.id voter_uuid%}" method="post">
+                        <form class="form-horizontal" role = "form" action="{% url 'vote:vote' poll.uuid voter_uuid%}" method="post">
                             {% csrf_token %}
                             {% if error_message %}
                                 <div class="form-group">

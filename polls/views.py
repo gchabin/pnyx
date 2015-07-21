@@ -10,9 +10,9 @@ from django.core.urlresolvers import reverse
 from django.views import generic
 from django.contrib.auth.decorators import login_required
 from django.utils.decorators import method_decorator
-from django.contrib.formtools.wizard.views import SessionWizardView
-from django.forms.util import ErrorList
-from django.core.mail import send_mass_mail, send_mail
+from formtools.wizard.views import SessionWizardView
+from django.forms.utils import ErrorList
+from django.core.mail import EmailMessage, send_mass_mail
 from django.template.loader import render_to_string
 
 from collections import Counter
@@ -21,6 +21,7 @@ import re #regex
 import uuid
 import numpy as np
 import logging
+import pytz
 logger = logging.getLogger(__name__)
 
 ############################
@@ -44,8 +45,7 @@ TEMPLATES = {"0": "polls/create_poll_general_setting.html",
 ######################
 #inner methods
 
-def set_upcoming_poll(poll, request, pk):
-
+def set_upcoming_poll(poll, request, uuid):
     # retrieve the tie breaking rule and parse it
     alternative_name_by_priority = []
     alternative_set = list(poll.alternative_set.all().order_by("priority_rank"))
@@ -182,12 +182,12 @@ def set_upcoming_poll(poll, request, pk):
 
                 send_mass_mail(message, fail_silently = False)
 
-            if poll.opening_date != set_up_poll_form.cleaned_data['opening_date']:
-                poll.opening_date = set_up_poll_form.cleaned_data['opening_date']
-
-            if poll.closing_date != set_up_poll_form.cleaned_data['closing_date']:
-                poll.closing_date = set_up_poll_form.cleaned_data['closing_date']
-
+            opening_date_form = set_up_poll_form.cleaned_data['opening_date']
+            if poll.opening_date != opening_date_form:
+                poll.opening_date = opening_date_form
+            closing_date_form = set_up_poll_form.cleaned_data['closing_date']
+            if poll.closing_date != closing_date_form:
+                poll.closing_date = closing_date_form
             if poll.input_type != set_up_poll_form.cleaned_data['input_type']:
                 poll.input_type = set_up_poll_form.cleaned_data['input_type']
 
@@ -246,8 +246,8 @@ def set_upcoming_poll(poll, request, pk):
                 send_mass_mail(message, fail_silently = False)
 
             poll.save()
-            logger.debug("Upcomming poll " + str(pk) + " updated")
-            return HttpResponseRedirect(reverse('polls:update_confirmation', kwargs = {'pk': pk}))
+            logger.debug("Upcomming poll " + str(uuid) + " updated")
+            return HttpResponseRedirect(reverse('polls:update_confirmation', kwargs = {'uuid': uuid}))
     else:
 
         tie_breaking = True if poll.tie_breaking == 'Custom' else False
@@ -275,7 +275,7 @@ def set_upcoming_poll(poll, request, pk):
     })
 
 
-def set_closed_poll(poll, request, pk):
+def set_closed_poll(poll, request, uuid):
 
     if request.method == 'POST':
         set_up_poll_form = SetUpClosedPollForm(request.POST)
@@ -289,8 +289,8 @@ def set_closed_poll(poll, request, pk):
                 poll.description = set_up_poll_form.cleaned_data['poll_description']
 
             poll.save()
-            logger.debug("Closed poll " + str(pk) + " updated")
-            return HttpResponseRedirect(reverse('polls:update_confirmation', kwargs = {'pk': pk}))
+            logger.debug("Closed poll " + str(poll.pk) + " updated")
+            return HttpResponseRedirect(reverse('polls:update_confirmation', kwargs = {'uuid': uuid}))
     else:
         data = {'poll_name': poll.name,
                 'poll_description': poll.description,
@@ -299,12 +299,11 @@ def set_closed_poll(poll, request, pk):
         set_up_poll_form = SetUpClosedPollForm(data)
 
     return render(request, 'polls/change_closed_poll_setting.html', {
-        'set_up_poll_form': set_up_poll_form, 'poll_pk': pk
+        'set_up_poll_form': set_up_poll_form, 'poll_uuid': uuid
     })
 
 
-def set_opened_poll(poll, request, pk):
-
+def set_opened_poll(poll, request, uuid):
     if request.method == 'POST':
         set_up_poll_form = SetUpOpenedPollForm(request.POST)
         if set_up_poll_form.is_valid():
@@ -322,8 +321,9 @@ def set_opened_poll(poll, request, pk):
             elif poll.temporary_result != False and not set_up_poll_form.cleaned_data['poll_temporary_result']:
                 poll.temporary_result = False
 
-            if poll.closing_date != set_up_poll_form.cleaned_data['closing_date']:
-                poll.closing_date = set_up_poll_form.cleaned_data['closing_date']
+            closing_date_form = set_up_poll_form.cleaned_data['closing_date']
+            if poll.closing_date != closing_date_form:
+                poll.closing_date = closing_date_form
 
             #add the new participants and email them
             if 'voter_to_add' in set_up_poll_form.cleaned_data.keys() and set_up_poll_form.cleaned_data[
@@ -354,8 +354,8 @@ def set_opened_poll(poll, request, pk):
                 send_mass_mail(message, fail_silently = False)
 
             poll.save()
-            logger.debug("Opened poll " + str(pk) + " updated")
-            return HttpResponseRedirect(reverse('polls:update_confirmation', kwargs = {'pk': pk}))
+            logger.debug("Opened poll " + str(uuid) + " updated")
+            return HttpResponseRedirect(reverse('polls:update_confirmation', kwargs = {'uuid': uuid}))
     else:
         data = {'poll_name': poll.name,
                 'poll_description': poll.description,
@@ -363,9 +363,8 @@ def set_opened_poll(poll, request, pk):
                 'closing_date': timezone.localtime(poll.closing_date).strftime('%d/%m/%Y %H:%M'),
                 }
         set_up_poll_form = SetUpOpenedPollForm(data)
-
     return render(request, 'polls/change_opened_poll_setting.html', {
-        'set_up_poll_form': set_up_poll_form, 'poll_pk': pk
+        'set_up_poll_form': set_up_poll_form, 'poll_uuid': uuid
     })
 
 
@@ -413,7 +412,9 @@ class CreatePollWizardView(SessionWizardView):
             # add the default opening date and closing date
             opening_date_default = timezone.localtime(timezone.now()).strftime('%d/%m/%Y %H:%M')
             closing_date_default = timezone.localtime(timezone.now() + datetime.timedelta(days=1)).strftime('%d/%m/%Y %H:%M')
-            return self.initial_dict.get(step, {'opening_date': opening_date_default, 'closing_date': closing_date_default})
+            # set the poll to private
+            poll_private_default = True
+            return self.initial_dict.get(step, {'opening_date': opening_date_default, 'closing_date': closing_date_default, 'poll_private': poll_private_default})
         return self.initial_dict.get(step, {})
 
 
@@ -556,15 +557,13 @@ class CreatePollWizardView(SessionWizardView):
                                 render_to_string('polls/added_to_poll_email.html', message_data),
                                 self.request.user.email,
                                 [participant]),)
-
             send_mass_mail(message, fail_silently = False)
 
         #redirect to the confirmation page
-        return HttpResponseRedirect(reverse('polls:create_poll_confirmation', kwargs={'pk': poll.pk}))
+        return HttpResponseRedirect(reverse('polls:create_poll_confirmation', kwargs={'uuid': poll.uuid}))
 
 '''confirmation page that the poll is created'''
 class CreatePollConfirmation(generic.TemplateView):
-
     template_name = "polls/create_poll_confirmation.html"
 
     #decorate the class based view
@@ -576,7 +575,7 @@ class CreatePollConfirmation(generic.TemplateView):
         context = super(CreatePollConfirmation, self).get_context_data(**kwargs)
         context['domain'] = self.request.get_host()
         context['protocol'] = self.request.is_secure() and 'https' or 'http'
-        context['private'] = get_object_or_404(Poll, pk = kwargs['pk']).private
+        context['private'] = get_object_or_404(Poll, uuid = kwargs['uuid']).private
 
         return context
 
@@ -593,25 +592,27 @@ class ManagePollView(generic.ListView):
     def get_queryset(self):
         #return the running polls
         logger.debug("Get the polls currently opened for the Manage View" )
-        return Poll.objects.filter(
+        timestamp = timezone.now()
+        key =  Poll.objects.filter(
             admin = self.request.user
         ).filter(
-            opening_date__lte= timezone.now()
+            opening_date__lte= timestamp
         ).filter(
-            closing_date__gte = timezone.now()
+            closing_date__gte = timestamp
         ).order_by(
             '-creation_date'
         )
+        return key
     '''add the other polls'''
     def get_context_data(self, **kwargs):
         # Call the base implementation first to get a context
         logger.debug("Add the upcoming polls and the closed ones for the Manage View")
         context = super(ManagePollView, self).get_context_data(**kwargs)
-
+        timestamp = timezone.now()
         context['upcoming_poll_list'] = Poll.objects.filter(
             admin = self.request.user
         ).exclude(
-            opening_date__lte= timezone.now()
+            opening_date__lte= timestamp
         ).order_by(
             '-creation_date'
         )
@@ -619,7 +620,7 @@ class ManagePollView(generic.ListView):
         context['closed_poll_list'] = Poll.objects.filter(
             admin = self.request.user
         ).exclude(
-            closing_date__gte= timezone.now()
+            closing_date__gte= timestamp
         ).order_by(
             '-creation_date'
         )
@@ -628,13 +629,15 @@ class ManagePollView(generic.ListView):
 '''view detailing all the proprties of one poll'''
 class DetailView(generic.DetailView):
 
+    slug_url_kwarg = 'uuid'
+    slug_field = 'uuid'
     model = Poll
     template_name = 'polls/detail.html'
 
     #decorate the class based view
     @method_decorator(login_required)
     def dispatch(self, request, *args, **kwargs):
-        poll = Poll.objects.get(pk = kwargs['pk'])
+        poll = Poll.objects.get(uuid = kwargs['uuid'])
         if not poll.admin == request.user:
             logger.debug("user and admin are different: no right to see the details")
             return HttpResponseRedirect(reverse('polls:no_right'))
@@ -656,13 +659,15 @@ class DetailView(generic.DetailView):
 
 '''view confirming the changes performed on an existing poll'''
 class UpdateConfirmationView(generic.DetailView):
+    slug_url_kwarg = 'uuid'
+    slug_field = 'uuid'
     model = Poll
     template_name = 'polls/change_poll_confirmation.html'
 
     #decorate the class based view
     @method_decorator(login_required)
     def dispatch(self, request, *args, **kwargs):
-        poll = Poll.objects.get(pk = kwargs['pk'])
+        poll = Poll.objects.get(uuid = kwargs['uuid'])
         if not poll.admin == request.user:
             logger.debug("user and admin are different: no right to modify the poll")
             return HttpResponseRedirect(reverse('polls:no_right'))
@@ -674,14 +679,15 @@ class NoRightView(generic.TemplateView):
 
 '''view that delete and confirm the deletion of a poll'''
 class DeletePollView(generic.DetailView):
-
+    slug_url_kwarg = 'uuid'
+    slug_field = 'uuid'
     model = Poll
     template_name = 'polls/delete_poll.html'
 
     #decorate the class based view
     @method_decorator(login_required)
     def dispatch(self, request, *args, **kwargs):
-        poll = Poll.objects.get(pk = kwargs['pk'])
+        poll = Poll.objects.get(uuid = kwargs['uuid'])
         if not poll.admin == request.user:
             logger.debug("user and admin are different: no right to delete the poll")
             return HttpResponseRedirect(reverse('polls:no_right'))
@@ -697,14 +703,15 @@ class DeletePollView(generic.DetailView):
 
 '''view containg the preference profile under preflibs standards'''
 class PreflibView(generic.DetailView):
-
+    slug_url_kwarg = 'uuid'
+    slug_field = 'uuid'
     model = Poll
     template_name = 'polls/preflib.html'
 
     #decorate the class based view
     @method_decorator(login_required)
     def dispatch(self, request, *args, **kwargs):
-        poll = Poll.objects.get(pk = kwargs['pk'])
+        poll = Poll.objects.get(uuid = kwargs['uuid'])
         if not poll.admin == request.user:
             logger.debug("user and admin are different")
             return HttpResponseRedirect(reverse('polls:no_right'))
@@ -787,56 +794,124 @@ class PreflibView(generic.DetailView):
 '''view that allows to update the settings of an existing poll.
 Depeding on the status of the poll an adapted poll will be used'''
 @login_required
-def change_settings_view(request, pk, *args, **kwargs):
+def change_settings_view(request, uuid, *args, **kwargs):
 
-    poll = Poll.objects.get(pk = pk)
+    poll = Poll.objects.get(uuid = uuid)
     if not poll.admin == request.user:
         logger.debug("user and admin are different: no right to see the details")
         return HttpResponseRedirect(reverse('polls:no_right'))
     elif poll.opening_date >= timezone.now():
         #the poll is not opened yet
-        return set_upcoming_poll(poll, request, pk)
+        return set_upcoming_poll(poll, request, uuid)
     elif poll.closing_date <= timezone.now():
         #the poll is closed
-        return set_closed_poll(poll, request, pk)
+        return set_closed_poll(poll, request, uuid)
     else:
         #the poll is opened
-        return set_opened_poll(poll, request, pk)
-'''send a email to the participat of a given poll. This is send through pnyx email adress'''
+        return set_opened_poll(poll, request, uuid)
+
+'''send a email to the participant of a given poll. This is sent through pnyx email adress'''
 class EmailParticipant(generic.FormView):
+    slug_url_kwarg = 'uuid'
+    slug_field = 'uuid'
     template_name = 'polls/email_participant.html'
     form_class = EmailParticipantForm
 
     def form_valid(self, form):
         # This method is called when valid form data has been POSTed.
         # It should return an HttpResponse.
-        participant_list = list(get_object_or_404(Poll, pk = self.kwargs['pk']).participant.all())
+        participant_list = list(get_object_or_404(Poll, uuid = self.kwargs['uuid']).participant.all())
         email_list = ()
         for participant in participant_list:
             email_list += (participant.email),
         if email_list:
             #specify the participants
-            send_mail(form.cleaned_data['subject'],
-                      form.cleaned_data['message'],
-                      self.request.user.email,
-                      email_list,
-                      fail_silently = False)
+            email = EmailMessage(subject = form.cleaned_data['subject'], body = form.cleaned_data['message'], from_email = self.request.user.email, bcc = email_list)
+            email.send(fail_silently = False)
         return HttpResponseRedirect(reverse('polls:detail', kwargs = self.kwargs))
 
-'''View confirming the emails have been send'''
+'''View confirming the emails have been sent'''
 class EmailParticipantConfirmation(generic.DetailView):
-
+    #not used
+    slug_url_kwarg = 'uuid'
+    slug_field = 'uuid'
     model = Poll
-    template_name = 'polls/change_poll_confirmation.html'
+    template_name = 'polls/email_participant_confirmation.html'
 
     #decorate the class based view
     @method_decorator(login_required)
     def dispatch(self, request, *args, **kwargs):
-        poll = Poll.objects.get(pk = kwargs['pk'])
+        poll = Poll.objects.get(uuid = kwargs['uuid'])
         if not poll.admin == request.user:
             logger.debug("user and admin are different: no right to delete the poll")
             return HttpResponseRedirect(reverse('polls:no_right'))
-        return super(UpdateConfirmationView, self).dispatch(request, *args, **kwargs)
+        return super(EmailParticipantConfirmation, self).dispatch(request, *args, **kwargs)
+
+'''Resend the links of a given poll to the participants. This is sent through pnyx email adress'''
+@login_required
+def send_link_participant(request, uuid, *args, **kwargs):
+
+    poll = get_object_or_404(Poll, uuid = uuid)
+    if not poll.admin == request.user:
+        logger.debug("user and admin are different: no right to see send_link_participant")
+        return HttpResponseRedirect(reverse('polls:no_right'))
+    else:
+        if request.method == 'POST':
+            send_link_form = SendLinkParticipantForm(request.POST)
+            print send_link_form
+            print send_link_form.cleaned_data
+            #print send_link_form.cleaned_data
+            # add the new participants and email them
+            if 'notify_all' in send_link_form.cleaned_data.keys():
+                # add all voters in the list
+                tmp_list = list(poll.participant.all())
+                participant_list = list()
+                for tmp in tmp_list:
+                    participant_list.append(tmp.email)
+
+            elif 'participant_to_notify' in send_link_form.cleaned_data.keys() \
+                    and send_link_form.cleaned_data['participant_to_notify'].__len__() > 0:
+                # add the selected voter
+                participant_list = list(
+                    send_link_form.cleaned_data["participant_to_notify"]
+                )
+
+            message = ()
+            for email in participant_list:
+                if email != "default_voter@pnyx.com":
+                    voter, created = Voter.objects.get_or_create(email = email)
+                    if created:
+                        # remove the new voter
+                        voter.delete()
+                    else:
+                        message_data = {
+                            'admin': request.user,
+                            'voter_uuid': voter.uuid if poll.private else 'public',
+                            'poll': poll,
+                            'domain': request.get_host(),
+                            'protocol': request.is_secure() and 'https' or 'http',
+                        }
+                        logger.debug("Voter " + voter.email + " notifed of poll's links " + str(poll.pk))
+                        message += (('The links to your Pnyx poll',
+                                     render_to_string('polls/send_link_participant_email.html', message_data),
+                                     request.user.email,
+                                     [email]),)
+
+            send_mass_mail(message, fail_silently = False)
+
+            return HttpResponseRedirect(reverse('polls:detail', kwargs = {'uuid': uuid}))
+        else:
+            send_link_form = SetUpClosedPollForm()
+
+        return render(request, 'polls/send_link_participant.html', {
+            'send_link_form': send_link_form,
+            'poll':poll,
+            'poll_uuid': uuid,
+            'voter_uuid': 'voter-id-abc123' if poll.private else 'public',
+            'domain': request.get_host(),
+            'protocol': request.is_secure() and 'https' or 'http',
+
+        })
 
 class OopsView(generic.TemplateView):
     template_name = 'polls/oops.html'

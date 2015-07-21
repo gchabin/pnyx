@@ -14,14 +14,14 @@
         <div class="row">
             <div class="col-md-5 col-md-offset-1">
                 <a href="{% url 'polls:create_poll'%}" >
-                    <img class='img-responsive' class='img-responsive' src= "{% static 'polls/images/poll_icon.png' %}" alt="">
+                    <img class='img-responsive center-block' class='img-responsive' src= "{% static 'polls/images/poll_icon.png' %}" alt="">
                     <h2 class="text-center text-muted">Create a poll</h2>
                 </a>
             </div>
             <div class="col-md-5">
                 <a href="{% url 'polls:manage_poll'%}">
-                    <img class='img-responsive' class='img-responsive' src= "{% static 'polls/images/settings_icon.png' %}" alt="">
-                    <h2 class="text -center text-muted">Manage your polls</h2>
+                    <img class='img-responsive center-block' class='img-responsive' src= "{% static 'polls/images/settings_icon.png' %}" alt="">
+                    <h2 class="text-center text-muted">Manage your polls</h2>
                 </a>
             </div>
         </div>
@@ -38,13 +38,13 @@
                     {% for poll in latest_poll_list %}
                         <div class="col-md-4">
                             <div class="thumbnail">
-                                <a class="navbar-link" href={%  url "polls:detail" poll.pk %} role="button"><h3> {{poll.name|truncatechars:20 }}</h3></a>
+                                <a class="navbar-link" href={%  url "polls:detail" poll.uuid %} role="button"><h3> {{poll.name|truncatechars:20 }}</h3></a>
                                 <p>{{ poll.question|truncatechars:30}}</p>
                                 <p>closing date: {{ poll.closing_date|date:"d/m/Y" }}, {{ poll.closing_date|time:"H:i" }}</p>
                                 <div class="btn-group-xs">
-                                    <a class="btn btn-link" href="{%  url "polls:detail" poll.pk %}" role="button"> Details</a>
-                                    <a class="btn btn-link" href="{% url 'polls:setup' poll.pk %}" role="button"> Settings</a>
-                                    <a class="btn btn-link" href="{% url 'polls:email_participant' poll.pk %}" role="button">Email participants</a>
+                                    <a class="btn btn-link" href="{%  url "polls:detail" poll.uuid %}" role="button"> Details</a>
+                                    <a class="btn btn-link" href="{% url 'polls:setup' poll.uuid %}" role="button"> Settings</a>
+                                    <a class="btn btn-link" href="{% url 'polls:email_participant' poll.uuid %}" role="button">Email participants</a>
                                 </div>
                             </div>
                         </div>

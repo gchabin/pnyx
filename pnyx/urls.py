@@ -11,7 +11,7 @@ admin.autodiscover()
 urlpatterns = patterns('',
 
     #subapps
-    url('^$', RedirectView.as_view(url=reverse_lazy('polls:index'))),
+    url('^$', RedirectView.as_view(url=reverse_lazy('polls:index'), permanent=True)),
     url(r'^polls/', include('polls.urls', namespace="polls" )),
     url(r'^vote/', include('vote.urls', namespace = "vote")),
     url(r'^admin/', include(admin.site.urls), name='admin'),

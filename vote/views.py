@@ -44,7 +44,7 @@ def get_voter_by_uuid(voter_uuid):
 
 
 def get_relative_majority_graph(majority_graph_matrix):
-    '''return the majortity grah with weighted edges  weighted_matrix[i,j] = max( n_ij-n_ji, 0)'''
+    '''return the majority graph with weighted edges  weighted_matrix[i,j] = max( n_ij-n_ji, 0)'''
 
     weighted_matrix = np.zeros(majority_graph_matrix.shape, int)
     for i, j in combinations(range(0,majority_graph_matrix.shape[0]), 2):
@@ -73,7 +73,7 @@ def get_majority_graph_matrix(poll):
     ''' returns the majority graph under a matrix form
     alternative_pk_list is the list of the alternative classed by pk
     majority_graph_matrix[index_of_a_alternative_pk_list][index_of_b_in_alternative_pk_list] = n_ab
-    since there is indeference, we need n_ab AND n_ba'''
+    since there is indifference, we need n_ab AND n_ba'''
 
     alternative_pk_list = []
     for alternatinive in poll.alternative_set.all().order_by("name").values("pk"):
@@ -84,8 +84,8 @@ def get_majority_graph_matrix(poll):
         #We need to convert the transitive preference to binary relations
         query_set_pref = TransitivePreference.objects.filter(alternative__poll = poll.pk).order_by(
             'voter__pk').distinct().all()  #.all() cache the value
-        pref_list = list(query_set_pref.all())  #without list() the queryset is troncated
-        voter_pk_list = list(query_set_pref.values('voter__pk').all())  #values() return a list of dict [{voter__pk:pk}]
+        pref_list = list(query_set_pref.all())  #without list() the queryset is truncated
+        voter_pk_list = list(query_set_pref.values('voter__pk').all())  #values() return a list of dict [{voter__uuid:pk}]
 
         for i, j in combinations(range(alternative_pk_list.__len__()), 2):
             for voter_dict in voter_pk_list:
@@ -120,10 +120,10 @@ def get_transitive_preference(poll):
     if poll.input_type == 'Bi':
         return None
     else:
-        #else get the transtive preference preferences ordered by voter
+        #else get the transitive preference preferences ordered by voter
         query_set_pref = TransitivePreference.objects.filter(alternative__poll = poll.pk).order_by('voter__pk'). \
             distinct().all() #.all() cache the value
-        pref_list = list(query_set_pref.all()) #without list() the queryset is troncated
+        pref_list = list(query_set_pref.all()) #without list() the queryset is truncated
         voter_uuid_list = list(query_set_pref.values('voter__uuid').all()) #list of dict
 
         #construct the pref_matrix
@@ -139,7 +139,7 @@ def get_transitive_preference(poll):
 
 def get_approval_matrix(poll, transitive_preference):
     '''return the approval matrix of the poll. lrow are alternatives, columns are voters.
-    If the voter j aproved the alternative i  approval_matrix[i,j] = 1 else 0'''
+    If the voter j approved the alternative i  approval_matrix[i,j] = 1 else 0'''
 
     alternative_pk_list = []
     for alternatinive in poll.alternative_set.all().order_by("name").values("pk"):
@@ -178,7 +178,7 @@ def process_vote_most_preferred_alternative(request, poll, voter_uuid):
 
     else:
         # the rank attribute ensures the transitivity
-        # transitive_preference conatins a unique alternative
+        # transitive_preference contains a unique alternative
         # the choice request needs to contain a unique alternative to be valid
         # the completeness is ensured assuming that all the other alternatives are ranked #2
         # they don't need to be saved in the db
@@ -193,7 +193,7 @@ def process_vote_most_preferred_alternative(request, poll, voter_uuid):
         transitive_preference.alternative.add(selected_choice)
 
         logger.debug("Vote of voter (" + str(voter.pk) +","+ voter.email + ") processed for poll " + str(poll.pk))
-        return HttpResponseRedirect(reverse('vote:confirmation', kwargs = {'pk': poll.pk, 'voter_uuid':voter_uuid}))
+        return HttpResponseRedirect(reverse('vote:confirmation', kwargs = {'uuid': poll.uuid, 'voter_uuid':voter_uuid}))
 
 
 def process_vote_dichotomous(request, poll, voter_uuid):
@@ -201,12 +201,12 @@ def process_vote_dichotomous(request, poll, voter_uuid):
     # get the voter from UUID
     voter = get_voter_by_uuid(voter_uuid)
 
-    #all alternive ID selected in POST['choice']
+    #all alternative ID selected in POST['choice']
     selected_choice_id = request.POST.getlist('choice', False)
     query_set = poll.alternative_set.all()
     if selected_choice_id :
         # the rank attribute ensures the transitivity
-        # transitive_preference all the top-ranked alternaives
+        # transitive_preference all the top-ranked alternatives
         # the completeness is ensured assuming that all the other alternatives are ranked #2
         # they don't need to be saved in the db
 
@@ -222,7 +222,7 @@ def process_vote_dichotomous(request, poll, voter_uuid):
             transitive_preference_selected.alternative.add(alternative)
     # don't store the vote for unselected alternatives
     logger.debug("Vote of voter (" + str(voter.pk) + "," + voter.email + ") processed for poll " + str(poll.pk))
-    return HttpResponseRedirect(reverse('vote:confirmation', kwargs = {'pk': poll.pk, 'voter_uuid': voter_uuid}))
+    return HttpResponseRedirect(reverse('vote:confirmation', kwargs = {'uuid': poll.uuid, 'voter_uuid': voter_uuid}))
 
 def process_vote_linear_order(request, poll, voter_uuid):
     '''view that process a vote for a 'linear order ballot' and save the preferences in the database'''
@@ -235,7 +235,7 @@ def process_vote_linear_order(request, poll, voter_uuid):
         rank_list.append(request.POST.get('choice_'+str(k),False))
         if False in rank_list:
             # the list contains False
-            return HttpResponseServerError("An error occured getting the choice " + str(k))
+            return HttpResponseServerError("An error occurred getting the choice " + str(k))
         elif len(rank_list)!=len(set(rank_list)):
             # the list contains duplicated values, redisplay the poll voting form.
             template_name = poll.get_ballot_template_name()
@@ -251,8 +251,8 @@ def process_vote_linear_order(request, poll, voter_uuid):
         try:
             alternative_list.append(poll.alternative_set.get(pk = alt_id))
         except (KeyError, Alternative.DoesNotExist):
-            # Error retrieveing the alternaitve
-            return HttpResponseServerError("An error occured retriving the alternative id=" + str(alt_id))
+            # Error retrieving the alternative
+            return HttpResponseServerError("An error occurred retrieving the alternative id=" + str(alt_id))
 
     for alternative in alternative_list:
         # the rank attribute ensures the transitivity 
@@ -266,7 +266,7 @@ def process_vote_linear_order(request, poll, voter_uuid):
         transitive_preference.alternative.add(alternative)
 
     logger.debug("Vote of voter (" + str(voter.pk) + "," + voter.email + ") processed for poll " + str(poll.pk))
-    return HttpResponseRedirect(reverse('vote:confirmation', kwargs = {'pk': poll.pk, 'voter_uuid': voter_uuid}))
+    return HttpResponseRedirect(reverse('vote:confirmation', kwargs = {'uuid': poll.uuid, 'voter_uuid': voter_uuid}))
 
 def process_vote_complete_preorder(request, poll, voter_uuid):
     '''view that process a vote for a 'preorders ballot' and save the preferences in the database'''
@@ -285,7 +285,7 @@ def process_vote_complete_preorder(request, poll, voter_uuid):
         if list:
             check_list.extend(list)
     if len(check_list) != len(set(check_list)):
-        # the list contains alternatives selected multipletime
+        # the list contains alternatives selected multiple times
         # Redisplay the poll voting form.
         template_name = poll.get_ballot_template_name()
         return render(request, template_name,
@@ -327,7 +327,7 @@ def process_vote_complete_preorder(request, poll, voter_uuid):
             transitive_preference.alternative.add(alt)
 
     logger.debug("Vote of voter (" + str(voter.pk) + "," + voter.email + ") processed for poll " + str(poll.pk))
-    return HttpResponseRedirect(reverse('vote:confirmation', kwargs = {'pk': poll.pk, 'voter_uuid': voter_uuid}))
+    return HttpResponseRedirect(reverse('vote:confirmation', kwargs = {'uuid': poll.uuid, 'voter_uuid': voter_uuid}))
 
 def process_vote_complete_binary_relation(request, poll, voter_uuid):
     '''view that process a vote for a 'binary relation ballot' and save the binary relations in the database'''
@@ -339,7 +339,7 @@ def process_vote_complete_binary_relation(request, poll, voter_uuid):
         #get the the comparison from the POST request
 
         # the BinaryRelation contains only strict preferences
-        # the completeness is ensured assuming that the lacking relations are indeferences
+        # the completeness is ensured assuming that the lacking relations are indifferences
         # they don't need to be saved in the db
 
         if list[0]!="csrfmiddlewaretoken":
@@ -347,7 +347,7 @@ def process_vote_complete_binary_relation(request, poll, voter_uuid):
             alt_id = re.split('_', list[0])
             #the value returned by the form is the id of the dominant alt or -1 in case of indifference
             if int(list[1][0]) != -1:
-                # need only the srtict preference
+                # need only the strict preference
                 if alt_id[1] == list[1][0]:
                     dominated_id = alt_id[2]
                     dominant_id = alt_id[1]
@@ -363,7 +363,7 @@ def process_vote_complete_binary_relation(request, poll, voter_uuid):
                 pref.save()
 
     logger.debug("Vote of voter (" + str(voter.pk) + "," + voter.email + ") processed for poll " + str(poll.pk))
-    return HttpResponseRedirect(reverse('vote:confirmation', kwargs = {'pk': poll.pk, 'voter_uuid': voter_uuid}))
+    return HttpResponseRedirect(reverse('vote:confirmation', kwargs = {'uuid': poll.uuid, 'voter_uuid': voter_uuid}))
 
 
 def compute_plurality_score( alternative_list, transitive_preference):
@@ -430,14 +430,7 @@ def process_result_best_alternative(poll, alternative_list, save_result, sorted_
         score_with_alt_name.append((get_object_or_404(Alternative, pk = sorted_score[i][0]).name, sorted_score[i][1]))
 
     #load the number of voters for temporary result
-    if poll.input_type =='Bi':
-        query_set_pref = BinaryRelation.objects.filter(dominant__poll = poll.pk).order_by('voter__pk'). \
-            distinct().all()  #.all() cache the value
-        nb_voter = len(list(query_set_pref.values('voter__uuid').all()))
-    else:
-        pref_profile = get_transitive_preference(poll)
-        nb_voter = len(pref_profile)
-
+    nb_voter = get_nb_voters(poll)
 
     return render_to_response(template_name, {
         "poll": poll,
@@ -448,9 +441,20 @@ def process_result_best_alternative(poll, alternative_list, save_result, sorted_
     }
     )
 
+def get_nb_voters(poll):
+    '''get number of voters who have already voted in this poll'''
+    if poll.input_type =='Bi':
+        query_set_pref = BinaryRelation.objects.filter(dominant__poll = poll.pk).order_by('voter__pk'). \
+            distinct().all()  #.all() cache the value
+        return len(list(query_set_pref.values('voter__uuid').all()))
+    else:
+        pref_profile = get_transitive_preference(poll)
+        return len(pref_profile)
+    return -1
+
 
 def process_result_ranking(poll, save_result, sorted_score):
-    '''process the results of social wellfare function for the template, and store them in the DB
+    '''process the results of social welfare function for the template, and store them in the DB
         if we are computing final results'''
     if save_result:
         show_detail = False
@@ -487,13 +491,7 @@ def process_result_ranking(poll, save_result, sorted_score):
     template_name = poll.get_results_template_name()
 
     #load the number of voters for temporary result
-    if poll.input_type == 'Bi':
-        query_set_pref = BinaryRelation.objects.filter(dominant__poll = poll.pk).order_by('voter__pk'). \
-            distinct().all()  #.all() cache the value
-        nb_voter = len(list(query_set_pref.values('voter__uuid').all()))
-    else:
-        pref_profile = get_transitive_preference(poll)
-        nb_voter = len(pref_profile)
+    nb_voter = get_nb_voters(poll)
 
     return render_to_response(template_name, {
         "poll": poll,
@@ -508,7 +506,7 @@ def process_result_lottery(poll, save_result, sorted_score):
         if we are computing final results'''
     if save_result:
         logger.debug("Final " + poll.get_choice_rule() + " lottery  " + str(sorted_score))
-        if poll.get_choice_rule() == 'random_dictatorship':
+        if poll.get_choice_rule() != 'maximal_lottery':
             poll.tie_breaking_used = False
         for alternative_pk, score_value, priority in sorted_score:
             alt = get_object_or_404(Alternative, pk = alternative_pk)
@@ -517,7 +515,7 @@ def process_result_lottery(poll, save_result, sorted_score):
 
     else:
         logger.debug("Temp " + poll.get_choice_rule() + " computed: lottery  " + str(sorted_score))
-        if poll.get_choice_rule() == 'random_dictatorship':
+        if poll.get_choice_rule() != 'maximal_lottery':
             poll.tie_breaking_used = False
     # replace the key (pk of the alt) by its name, drop priority
     lottery_with_alt_name = []
@@ -527,14 +525,7 @@ def process_result_lottery(poll, save_result, sorted_score):
     template_name = poll.get_results_template_name()
 
     #load the number of voters for temporary result
-    if poll.input_type == 'Bi':
-        query_set_pref = BinaryRelation.objects.filter(dominant__poll = poll.pk).order_by('voter__pk'). \
-            distinct().all()  #.all() cache the value
-        nb_voter = len(list(query_set_pref.values('voter__uuid').all()))
-    else:
-        pref_profile = get_transitive_preference(poll)
-        nb_voter = len(pref_profile)
-
+    nb_voter = get_nb_voters(poll)
 
     return render_to_response(template_name, {
         "poll": poll,
@@ -654,7 +645,7 @@ def young(request, poll, majority_graph_matrix, index_alternative_pk_array, save
 
 
 def random_dictatorship(request, poll, transitive_preference, save_result):
-    '''compute radom dictatorship lottery. on dichotomous profle with a unique best alt,
+    '''compute random dictatorship lottery. on dichotomous profile with a unique best alt,
     RD is equivalent to a lottery based on the plurality score'''
     tie_breaking = poll.tie_breaking
     alternative_list = poll.alternative_set.all()
@@ -668,10 +659,39 @@ def random_dictatorship(request, poll, transitive_preference, save_result):
         sorted_score[index] = (sorted_score[index][0], Decimal(sorted_score[index][1] * 100) / Decimal(sum_score), sorted_score[index][2])
     return process_result_lottery(poll, save_result, sorted_score)
 
+def random_plurality_winners(request, poll, transitive_preference, save_result):
+    '''compute the uniform lottery on plurality/approval winners.'''
+    tie_breaking = poll.tie_breaking
+    alternative_list = poll.alternative_set.all()
+    sorted_score = compute_plurality_score(alternative_list, transitive_preference)
+    sorted_score = get_uniform_lottery_over_winners(sorted_score)
+    return process_result_lottery(poll, save_result, sorted_score)
+
+def get_uniform_lottery_over_winners(input_scores):
+    '''Construct scores that correspond to a uniform lottery over the alternatives with maximal scores'''
+    number_winners = get_number_of_winners(input_scores)
+    getcontext().prec = 3
+    getcontext().rounding = ROUND_DOWN
+    probability = Decimal(1 * 100) / Decimal(number_winners)
+    #Update scores
+    for index in range(len(input_scores)):
+        if (index < number_winners):
+            input_scores[index] = (input_scores[index][0], probability, input_scores[index][2]) #winners
+        else:
+            input_scores[index] = (input_scores[index][0], Decimal(0), input_scores[index][2]) #non-winners
+    return input_scores
+    
+def get_number_of_winners(scores):
+    '''Compute the number of alternatives with maximal score'''
+    number_winners = 0
+    maximal_score = scores[0][1]
+    for index in range(len(scores)):
+        if scores[index][1] == maximal_score: number_winners += 1
+    return number_winners
 
 def kemeny(request, poll, penalty_weights, index_array, save_result):
-    '''Compute Kemeny rankings with an MIP It selects a set of edges of the tournament graph that minimizes the penality
-    weight and makes an antisymetric ranking'''
+    '''Compute Kemeny rankings with an MIP It selects a set of edges of the tournament graph that minimizes the penalty
+    weight and makes an antisymmetric ranking'''
     logger.debug("Computing Kemeny's rank for poll " + str(poll.pk))
     n_alternatives = penalty_weights.shape[0]
     # The problem variable is created to contain the problem data
@@ -787,10 +807,10 @@ def sub_maximal_lottery( objective_index, payoff_matrix, alternative_pk_array):
     return lottery
 
 def maximal_lottery(request, poll, payoff_matrix, alternative_pk_array, save_result):
-    ''' approximate the barycenter of maximal loteries set by taking the average of sevral maximal lotteries'''
+    ''' approximate the barycenter of maximal lotteries set by taking the average of several maximal lotteries'''
     n_alternatives = payoff_matrix.shape[0]
 
-    # matrix of the lottery of each sub prblem
+    # matrix of the lottery of each sub problem
     lottery_matrix = np.zeros((n_alternatives,n_alternatives))
     for index , alt_pk in enumerate(alternative_pk_array):
         lottery_matrix[index,:]  = sub_maximal_lottery(index, payoff_matrix, alternative_pk_array)
@@ -849,9 +869,9 @@ def strict_maximal_lottery(request, poll, payoff_matrix, alternative_pk_array, s
     prob += u, "objective function"
 
     # Creation of the constrain
-    prob += pulp.lpSum([p[b] for b in Sequence]) == 1 , "Propability distribution"
+    prob += pulp.lpSum([p[b] for b in Sequence]) == 1 , "Probability distribution"
 
-    # Utility greater than the security level in case of every pure strategy of the oponent
+    # Utility greater than the security level in case of every pure strategy of the opponent
     for a in range(n_alternatives):
         prob += pulp.lpSum([p[str(b)]*payoff_matrix[a,b] for j in range(n_alternatives)]) + u <= p[str(a)] , \
                 " inequality for alt " + str(a)
@@ -986,11 +1006,15 @@ def compute_and_display_results(request, poll , save_result):
             return borda(request, poll, transitive_preference, save_result)
         elif choice_rule == 'partially_ordered_borda':
             return partially_ordered_borda(request, poll, transitive_preference, save_result)
-        elif choice_rule == 'random_dictatorship':
-            return random_dictatorship(request, poll, transitive_preference, save_result)
-        elif choice_rule == 'nash':
-            utilitaian_matrix, alternative_pk_array = get_approval_matrix(poll, transitive_preference)
-            return nash(request, poll, utilitaian_matrix, alternative_pk_array , save_result)
+#         elif choice_rule == 'random_dictatorship':
+#             return random_dictatorship(request, poll, transitive_preference, save_result)
+#         elif choice_rule == 'nash':
+#             utilitaian_matrix, alternative_pk_array = get_approval_matrix(poll, transitive_preference)
+#             return nash(request, poll, utilitaian_matrix, alternative_pk_array , save_result)
+        elif choice_rule == 'uniform_plurality_lottery':
+            return random_plurality_winners(request, poll, transitive_preference, save_result)
+        elif choice_rule == 'uniform_approval_lottery':
+            return random_plurality_winners(request, poll, transitive_preference, save_result)
 
         return HttpResponseServerError("the choice rule" + choice_rule + " is not supported")
 
@@ -999,6 +1023,9 @@ def display_results(request, poll, voter_uuid):
     result  = poll.alternative_set.all().order_by('final_rank').values('name' , 'final_rank')
     output_type = poll.output_type
     template_name = poll.get_results_template_name()
+    
+    #load the number of voters for temporary result
+    nb_voter = get_nb_voters(poll)
 
     if output_type == 'B':
         winner = ""
@@ -1008,6 +1035,7 @@ def display_results(request, poll, voter_uuid):
         return render_to_response(template_name, {
             "poll": poll,
             "winner": winner,
+            "nb_voter": nb_voter,
             }
         )
 
@@ -1018,6 +1046,7 @@ def display_results(request, poll, voter_uuid):
         return render_to_response(template_name, {
             "poll": poll,
             "lottery": lottery,
+            "nb_voter": nb_voter,
             }
         )
     elif output_type == 'R':
@@ -1027,16 +1056,17 @@ def display_results(request, poll, voter_uuid):
         return render_to_response(template_name, {
             "poll": poll,
             "rank": rank,
+            "nb_voter": nb_voter,
             }
         )
 
     return HttpResponseServerError("the output type " + output_type + " is not supported")
 
 ####views###
-def get_ballot_view(request, pk, voter_uuid):
+def get_ballot_view(request, uuid, voter_uuid):
     '''display the ballot page. The template is chosen dynamicaly'''
 
-    poll = get_object_or_404(Poll, pk=pk)
+    poll = get_object_or_404(Poll, uuid=uuid)
     ballot_data = {}
     # check if the voter is valid
     if voter_uuid == 'public' and not poll.private:
@@ -1053,7 +1083,7 @@ def get_ballot_view(request, pk, voter_uuid):
                 if len(previous_vote) != 0 and not poll.change_vote:
                     # the vote is already saved and the voter cannot change the vote
                     return HttpResponseRedirect(
-                        reverse('vote:already_voted', kwargs = {'pk': poll.pk, 'voter_uuid': voter_uuid}))
+                        reverse('vote:already_voted', kwargs = {'uuid': poll.uuid, 'voter_uuid': voter_uuid}))
                 elif len(previous_vote) != 0:
                     # the vote is already saved and the voter CAN change the vote
                     # get the data from the vote and parse it to the ballot
@@ -1068,7 +1098,7 @@ def get_ballot_view(request, pk, voter_uuid):
                 if len(previous_vote) != 0 and not poll.change_vote:
                     # the vote is already saved and the voter cannot change the vote
                     return HttpResponseRedirect(
-                        reverse('vote:already_voted', kwargs = {'pk': poll.pk, 'voter_uuid': voter_uuid}))
+                        reverse('vote:already_voted', kwargs = {'uuid': poll.uuid, 'voter_uuid': voter_uuid}))
                 elif len(previous_vote) !=0:
                     logger.debug("previous  vote retrieved from database: " + str(previous_vote))
                     # the vote is already saved and the voter CAN change the vote
@@ -1077,17 +1107,18 @@ def get_ballot_view(request, pk, voter_uuid):
                         ballot_data[pref.rank] = pref.alternative.all()
         except (KeyError, Voter.DoesNotExist):
             return HttpResponseRedirect(
-                reverse('vote:unauthorized', kwargs = {'pk': poll.pk, 'voter_uuid': voter_uuid}))
+                reverse('vote:unauthorized', kwargs = {'uuid': poll.uuid, 'voter_uuid': voter_uuid}))
 
     else:
-        return HttpResponseServerError("Invalid voetr UUID")
+        return HttpResponseRedirect(
+            reverse('vote:wrong_uuid', kwargs = {'uuid': poll.uuid, 'voter_uuid': voter_uuid}))
 
     if poll.closing_date < timezone.now():
         #return the poll is closed
-        return HttpResponseRedirect(reverse('vote:poll_closed', kwargs = {'pk': pk , 'voter_uuid': voter_uuid}))
+        return HttpResponseRedirect(reverse('vote:poll_closed', kwargs = {'uuid': uuid , 'voter_uuid': voter_uuid}))
     elif poll.opening_date > timezone.now():
         #return the poll not opened yet
-        return HttpResponseRedirect(reverse('vote:poll_not_opened_yet', kwargs = {'pk': pk , 'voter_uuid': voter_uuid}))
+        return HttpResponseRedirect(reverse('vote:poll_not_opened_yet', kwargs = {'uuid': uuid , 'voter_uuid': voter_uuid}))
 
     template_name = poll.get_ballot_template_name()
     if template_name is None:
@@ -1099,10 +1130,10 @@ def get_ballot_view(request, pk, voter_uuid):
                                 RequestContext(request))
 
 
-def vote(request, pk, voter_uuid):
+def vote(request, uuid, voter_uuid):
     '''call afer a ballot submission. Check the validity of the vote and process it.'''
 
-    poll = get_object_or_404(Poll, pk=pk)
+    poll = get_object_or_404(Poll, uuid=uuid)
     input_type = poll.input_type
 
     # check if the voter is valid
@@ -1121,7 +1152,7 @@ def vote(request, pk, voter_uuid):
                     if len(previous_vote) != 0 and not poll.change_vote:
                         # the vote is already saved and the voter cannot change the vote
                         return HttpResponseRedirect(
-                            reverse('vote:already_voted', kwargs = {'pk': poll.pk, 'voter_uuid': voter_uuid}))
+                            reverse('vote:already_voted', kwargs = {'uuid': poll.uuid, 'voter_uuid': voter_uuid}))
                     elif len(previous_vote) != 0:
                         # the vote is already saved and the voter CAN change the vote
                         # delete the previous vote
@@ -1133,7 +1164,7 @@ def vote(request, pk, voter_uuid):
                     if len(previous_vote) != 0 and not poll.change_vote:
                         # the vote is already saved and the voter cannot change the vote
                         return HttpResponseRedirect(
-                            reverse('vote:already_voted', kwargs = {'pk': poll.pk, 'voter_uuid': voter_uuid}))
+                            reverse('vote:already_voted', kwargs = {'uuid': poll.uuid, 'voter_uuid': voter_uuid}))
                     elif len(previous_vote) != 0:
                         logger.debug("previous  vote retrieved from database: " + str(previous_vote))
                         # the vote is already saved and the voter CAN change the vote
@@ -1142,18 +1173,18 @@ def vote(request, pk, voter_uuid):
 
         except (KeyError, Voter.DoesNotExist):
             return HttpResponseRedirect(
-                reverse('vote:unauthorized', kwargs = {'pk': poll.pk, 'voter_uuid': voter_uuid}))
+                reverse('vote:unauthorized', kwargs = {'uuid': poll.uuid, 'voter_uuid': voter_uuid}))
 
     else:
-        return HttpResponseServerError("Voter UUID not valid")
-
+        return HttpResponseRedirect(
+            reverse('vote:wrong_uuid', kwargs = {'uuid': poll.uuid, 'voter_uuid': voter_uuid}))
 
     if poll.closing_date < timezone.now():
         #return the poll is closed
-        return HttpResponseRedirect(reverse('vote:poll_closed', kwargs = {'pk': pk, 'voter_uuid': voter_uuid}))
+        return HttpResponseRedirect(reverse('vote:poll_closed', kwargs = {'uuid': uuid, 'voter_uuid': voter_uuid}))
     elif poll.opening_date > timezone.now():
         #return the poll not opened yet
-        return HttpResponseRedirect(reverse('vote:poll_not_opened_yet', kwargs = {'pk': pk, 'voter_uuid': voter_uuid}))
+        return HttpResponseRedirect(reverse('vote:poll_not_opened_yet', kwargs = {'uuid': uuid, 'voter_uuid': voter_uuid}))
 
     if input_type == 'Pf':
         return process_vote_most_preferred_alternative(request, poll, voter_uuid)
@@ -1169,13 +1200,13 @@ def vote(request, pk, voter_uuid):
         return HttpResponseServerError("the input type " + input_type + " is not supported")
 
 
-def temporary_results(request, pk, voter_uuid):
+def temporary_results(request, uuid, voter_uuid):
     '''compute and display temporary results of a given poll'''
-    poll = get_object_or_404(Poll, pk = pk)
+    poll = get_object_or_404(Poll, uuid = uuid)
 
     if not (poll.temporary_result or poll.admin == request.user):
         #return temporary result not available for this poll
-        return HttpResponseRedirect(reverse('vote:no_temp_results', kwargs = {'pk': poll.pk, 'voter_uuid': voter_uuid}))
+        return HttpResponseRedirect(reverse('vote:no_temp_results', kwargs = {'uuid': poll.uuid, 'voter_uuid': voter_uuid}))
 
     # check if the voter is valid
     elif voter_uuid == 'public' and not poll.private:
@@ -1189,18 +1220,18 @@ def temporary_results(request, pk, voter_uuid):
             poll.participant.all().get(uuid = voter_uuid)
         except (KeyError, Voter.DoesNotExist):
             return HttpResponseRedirect(
-                reverse('vote:unauthorized', kwargs = {'pk': poll.pk, 'voter_uuid': voter_uuid}))
+                reverse('vote:unauthorized', kwargs = {'uuid': poll.uuid, 'voter_uuid': voter_uuid}))
 
     else:
-        return HttpResponseServerError("The voter UUID is not valid")
-
+        return HttpResponseRedirect(
+            reverse('vote:wrong_uuid', kwargs = {'uuid': poll.uuid, 'voter_uuid': voter_uuid}))
     return  compute_and_display_results(request, poll, False)
 
 
-def results(request, pk, voter_uuid):
+def results(request, uuid, voter_uuid):
     '''compute and display final results of a given poll'''
 
-    poll = get_object_or_404(Poll, pk=pk)
+    poll = get_object_or_404(Poll, uuid=uuid)
 
     # check if the voter is valid
     if voter_uuid == 'public' and not poll.private:
@@ -1214,16 +1245,16 @@ def results(request, pk, voter_uuid):
             poll.participant.all().get(uuid = voter_uuid)
         except (KeyError, Voter.DoesNotExist):
             return HttpResponseRedirect(
-                reverse('vote:unauthorized', kwargs = {'pk': poll.pk, 'voter_uuid': voter_uuid}))
+                reverse('vote:unauthorized', kwargs = {'uuid': poll.uuid, 'voter_uuid': voter_uuid}))
 
     elif voter_uuid != 'public':
-        return HttpResponseServerError("public poll voter UUID should be public")
-
+        return HttpResponseRedirect(
+            reverse('vote:wrong_uuid', kwargs = {'uuid': poll.uuid, 'voter_uuid': voter_uuid}))
     #check if the poll is periodic
     if not poll.recursive_poll:
         if timezone.now() < poll.closing_date:
             #return the result are not available
-            return HttpResponseRedirect(reverse('vote:poll_not_closed_yet', kwargs = {'pk': pk , 'voter_uuid': voter_uuid}))
+            return HttpResponseRedirect(reverse('vote:poll_not_closed_yet', kwargs = {'uuid': uuid , 'voter_uuid': voter_uuid}))
 
         #check a result is already computed
         if poll.alternative_set.all()[0].final_rank == None:
@@ -1236,7 +1267,7 @@ def results(request, pk, voter_uuid):
                 or (timezone.now() < poll.opening_date and poll.alternative_set.all()[0].final_rank == None):
             #return the result are not available
             return HttpResponseRedirect(
-                reverse('vote:poll_not_closed_yet', kwargs = {'pk': pk, 'voter_uuid': voter_uuid}))
+                reverse('vote:poll_not_closed_yet', kwargs = {'uuid': uuid, 'voter_uuid': voter_uuid}))
 
         else :
             if timezone.now() > poll.closing_date:

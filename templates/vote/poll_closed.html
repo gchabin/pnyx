@@ -11,7 +11,7 @@
             <h1>Sorry, this poll is closed</h1>
             <p>The results are published since: {{ poll.closing_date|date:"d/m/Y" }}, {{ poll.closing_date|time:"H:i" }}</p>
                 <p> You can access them:
-                    <a type="button" class="btn btn-lg btn-link" href="{%  url 'vote:results' poll.pk voter_uuid %}">here</a>
+                    <a type="button" class="btn btn-lg btn-link" href="{%  url 'vote:results' poll.uuid voter_uuid %}">here</a>
                 </p>
             <a type="button" class="btn btn-primary" href="{%  url 'polls:index' %}">Getting started with Pnyx</a>
         </div>

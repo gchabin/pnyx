@@ -8,15 +8,15 @@
 
     <div class="jumbotron">
         <div class="col-md-offset-1">
-            <h1>Nice try but you cannot vote twice!</h1>
+            <h1>You have voted already and, unfortunately, cannot vote twice!</h1>
             <p>The results will be published on: {{ poll.closing_date|date:"d/m/Y" }}, {{ poll.closing_date|time:"H:i" }}:
-                <a type="button" class="navbar-link" href="{%  url 'vote:results' poll.pk  voter_uuid %}">link</a>, or
+                <a type="button" class="navbar-link" href="{%  url 'vote:results' poll.uuid  voter_uuid %}">link</a>, or
                 <a id = "copy_button" type="button" class="navbar-link" >Copy to Clipboard</a><br>
             </p>
-            <p id="text_to_copy">{{ protocol }}://{{ domain }}{%  url 'vote:results' poll.pk  voter_uuid %}</p>
+            <p id="text_to_copy">{{ protocol }}://{{ domain }}{%  url 'vote:results' poll.uuid  voter_uuid %}</p>
             {% if poll.temporary_result %}
                 <p>You can see the temporary results
-                    <a type="button" class="navbar-link" href="{%  url 'vote:temp_results' poll.pk  voter_uuid %}">here</a>
+                    <a type="button" class="navbar-link" href="{%  url 'vote:temp_results' poll.uuid  voter_uuid %}">here</a>
                 </p>
             {% endif %}
             <a type="button" class="btn btn-primary" href="{%  url 'polls:index' %}">Getting started with Pnyx</a>

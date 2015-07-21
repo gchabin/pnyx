@@ -9,7 +9,7 @@
 {% endblock %}
 
 {% block form_content %}
-    <p>Please enter the <b>output</b> that will represent the aggregation</p>
+    <p>Please select the <b>output</b> for the aggregated preferences</p>
     {% if form.output_type.errors %}{{ form.output_type.errors }}{% endif %}
      <div class="container" id="selectable">
         <div  class="col-md-2 col-md-offset-1 ui-widget-content {% if form.output_type.value == 'B' %}ui-selected{%  endif %}"
@@ -17,21 +17,21 @@
             <div class="thumbnail">
                 <img class='img-responsive' class='img-responsive' src= "{% static 'polls/images/output_alternative.png' %}" height="150 " width="150" alt="">
             </div>
-            <p>Unique winner</p>
+            <p style="text-align:center">Unique winner</p>
         </div>
         <div  class="col-md-2 col-md-offset-1 ui-widget-content {% if form.output_type.value == 'L' %}ui-selected{%  endif %}"
               id="L">
             <div class="thumbnail">
                 <img class='img-responsive' class='img-responsive' src= "{% static 'polls/images/output_lottery.png' %}" height="150 " width="150" alt="">
             </div>
-            <p>Lottery</p>
+            <p style="text-align:center">Lottery</p>
         </div>
         <div  class="col-md-2 col-md-offset-1 ui-widget-content {% if form.output_type.value == 'R' %}ui-selected{%  endif %}"
               id="R">
             <div class="thumbnail">
                 <img class='img-responsive' class='img-responsive' src= "{% static 'polls/images/output_ranking.png' %}" height="150 " width="150" alt="">
             </div>
-            <p>Rankings without ties</p>
+            <p style="text-align:center">Rankings without ties</p>
         </div>
     </div>
     <div id="hidden-choice">

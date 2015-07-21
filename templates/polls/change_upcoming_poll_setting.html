@@ -1,5 +1,7 @@
 {% extends "base/base.html" %}
 {% load staticfiles %}
+{% load tz  %}
+{% get_current_timezone as TIME_ZONE %}
 
 {% block head %}
     <style>
@@ -14,7 +16,7 @@
         <h1>Enter the new settings</h1>
         <div class="jumbotron">
             <div class="col-md-offset-1">
-                <form method="post" role = "form" action="{% url 'polls:setup' poll.pk %}">
+                <form method="post" role = "form" action="{% url 'polls:setup' poll.uuid %}">
                     {% csrf_token %}
                     {% if set_up_poll_form.non_field_errors %}
                         <div class="form-group">
@@ -160,11 +162,13 @@
                         </div>
                         <div class="input-group col-md-6"> <span class="input-group-addon">Opening date</span>
                             <input type="datetime"  id="id_opening_date" name="opening_date" class="form-control"  value = "{{ set_up_poll_form.opening_date.value }}">
+                            <span class="input-group-addon">{{ TIME_ZONE }}</span>
                         </div>
                         {% if  set_up_poll_form.opening_date.errors %}<p><strong>{{ set_up_poll_form.opening_date.errors }}</strong></p>{% endif %}
                         <br>
                         <div class="input-group col-md-6"> <span class="input-group-addon">Closing date &nbsp;</span>
                             <input type="datetime" id="id_closing_date" name="closing_date" class="form-control" value = "{{ set_up_poll_form.closing_date.value }}">
+                            <span class="input-group-addon">{{ TIME_ZONE }}</span>
                         </div>
                         {% if set_up_poll_form.closing_date.errors %}<p><strong>{{ set_up_poll_form.closing_date.errors }}</strong></p>{% endif %}
                         <br>
@@ -247,7 +251,7 @@
                         <br>
                         <div class="form-group">
                             <input type="submit" class="btn btn-default pull-right" value="Save">
-                            <a class="btn btn-default" href="{% url 'polls:detail' poll.pk %}" role="button"> &laquo; Back</a>
+                            <a class="btn btn-default" href="{% url 'polls:detail' poll.uuid %}" role="button"> &laquo; Back</a>
                         </div>
                     </div>
                 </form>

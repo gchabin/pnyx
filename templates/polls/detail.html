@@ -1,10 +1,12 @@
 {% extends "base/base.html" %}
 {% load staticfiles %}
 {% load static %}
+{% load tz  %}
+{% get_current_timezone as TIME_ZONE %}
 
 {% block content %}
     <div class="container">
-        <h1>Configuration of the poll : {{poll}}</h1>
+        <h1>Configuration of the poll: {{poll}}</h1>
 
         <div class="jumbotron">
             <div class="container">
@@ -14,13 +16,14 @@
                         <div class="col-md-offset-1">
                             <h3 class="text-muted">Name &amp; description:</h3>
                             <p><b>Question:</b> {{ poll.question }}</p>
+                            <p><b>UUID:</b> {{ poll.uuid }}</p>
                             {% if poll.description %}
                                 <p><b>Description:</b> {{ poll.description }}</p>
                             {% endif %}
                             <h3 class="text-muted">Timeframe</h3>
-                            <p><b>Progress:</b> {{ poll.get_progress }}%</p>
-                            <p><b>Opening date:</b> {{ poll.opening_date|date:"d/m/Y" }}, {{ poll.opening_date|time:"H:i" }}</p>
-                            <p><b>Closing date:</b> {{ poll.closing_date|date:"d/m/Y" }}, {{ poll.closing_date|time:"H:i" }}</p>
+                            <p><b>Opening date:</b> {{ poll.opening_date|date:"d/m/Y" }}, {{ poll.opening_date|time:"H:i" }}, {{ TIME_ZONE }}</p>
+                            <p><b>Closing date:</b> {{ poll.closing_date|date:"d/m/Y" }}, {{ poll.closing_date|time:"H:i" }}, {{ TIME_ZONE }}</p>
+							<p><b>Time remaining:</b> {{ poll.get_remaining_time}} hours</p>
                             <p><b>Periodic poll: </b> {{ poll.recursive_poll }}</p>
                             {% if poll.recursive_poll %}
                             <p><b>Period of the poll: </b>{{ poll.recursive_period }} day{{ poll.recursive_period | pluralize }}</p>
@@ -34,7 +37,7 @@
                             Public
                             {% endif %}</p>
                             {% if poll.private %}
-                            <p><b>Voter can change their vote:</b>{{ poll.change_vote }}</p>
+                            <p><b>Voters can change their votes:</b> {{ poll.change_vote }}</p>
                             {%  endif %}
                             <h3 class="text-muted">Tie breaking</h3>
                             {% if poll.tie_breaking == 'Custom'%}
@@ -119,12 +122,13 @@
                 <div class="row">
                     <div class="col-md-12 col">
                         <div class="btn-group">
-                            <a type="button" class="btn btn-default" href="{% url 'vote:temp_results' poll.pk 'admin'%}" role="button">Link to the temporary results</a>
-                            <a type="button" class="btn btn-default" href="{% url 'vote:results' poll.pk 'admin' %}" role="button">Link to the final results</a>
-                            <a type="button" class="btn btn-default" href="{% url 'polls:email_participant' poll.pk %}" role="button">Email participants</a>
-                            <a type="button" class="btn btn-default" href="{% url 'polls:preflib' poll.pk %}" role="button">Preference profile</a>
+                            <a type="button" class="btn btn-default" href="{% url 'vote:temp_results' poll.uuid 'admin'%}" role="button">Link to the temporary results</a>
+                            <a type="button" class="btn btn-default" href="{% url 'vote:results' poll.uuid 'admin' %}" role="button">Link to the final results</a>
+                            <a type="button" class="btn btn-default" href="{% url 'polls:email_participant' poll.uuid %}" role="button">Email participants</a>
+                            <a type="button" class="btn btn-default" href="{% url 'polls:send_link_participant' poll.uuid %}" role="button">Share poll links</a>
+                            <a type="button" class="btn btn-default" href="{% url 'polls:preflib' poll.uuid %}" role="button">Preference profile</a>
                             {% if not poll.private %}
-                                <a type="button" class="btn btn-default" href="{% url 'vote:get_ballot_view' poll.pk 'public'%}" role="button">Link to the ballot</a>
+                                <a type="button" class="btn btn-default" href="{% url 'vote:get_ballot_view' poll.uuid 'public'%}" role="button">Link to the ballot</a>
                             {% endif %}
                         </div>
                     </div>
@@ -150,7 +154,7 @@
                             </div>
                             <div class="modal-footer">
                                 <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
-                                <a type="button" class="btn btn-warning" href="{% url 'polls:delete_poll' poll.pk %}" role="button">Delete poll</a>
+                                <a type="button" class="btn btn-warning" href="{% url 'polls:delete_poll' poll.uuid %}" role="button">Delete poll</a>
                             </div>
                         </div>
                     </div>
@@ -159,7 +163,7 @@
                 <div class = "raw">
                     <div class="col-md-12">
                         <a class="btn btn-default" href="{% url 'polls:manage_poll' %}" role="button"> &laquo; Back</a>
-                        <a class="btn btn-default pull-right" href="{% url 'polls:setup' poll.pk %}" role="button"> Change settings &raquo;</a>
+                        <a class="btn btn-default pull-right" href="{% url 'polls:setup' poll.uuid %}" role="button"> Change settings &raquo;</a>
                     </div>
                 </div>
                 <br>

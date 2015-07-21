@@ -1,0 +1,19 @@
+{%  load tz  %}{% load i18n %}{% autoescape off %}Hello,
+{% get_current_timezone as TIME_ZONE %}
+You are receiving this email because {{admin}} would like to remind you of the Pnyx poll "{{ poll.name }}".
+
+You can find the link for your ballot here:
+{{ protocol }}://{{ domain }}{%  url 'vote:get_ballot_view' poll.uuid voter_uuid %}
+Opening time: {{ poll.opening_date|localtime }}, {{ TIME_ZONE }}{% if TIME_ZONE != 'UTC' %}, ({{ poll.opening_date|utc }}, UTC){% endif %}
+Closing time: {{ poll.closing_date|localtime }}, {{ TIME_ZONE }}{% if TIME_ZONE != 'UTC' %}, ({{ poll.closing_date|utc }}, UTC){% endif %}
+
+The final results can be accessed via: 
+{{ protocol }}://{{ domain }}{%  url 'vote:results' poll.uuid voter_uuid %}
+{% if poll.temporary %} You also have access to the temporary results at: 
+{{ protocol }}://{{ domain }}{%  url 'vote:temp_results' poll.uuid voter_uuid %}{% endif %}
+
+Thanks for using Pnyx!
+
+The Pnyx team
+
+{% endautoescape %}

@@ -22,17 +22,17 @@
                     <div class="row">
                         <p> Tie-breaking has been performed.
                             {% if poll.tie_breaking == 'Custom' %}
-                                The tie-breaking order has been defined by the poll admin before the poll opened.
+                                The tie-breaking order has been defined by the poll creator before the poll opened.
                             {% else %}
-                                The tie-breaking order has been randomly generated before the poll opened and has been hidden from the poll administrator.
+                                The tie-breaking order has been randomly generated before the poll opened and is not known by the poll administrator.
                             {% endif %}
                         </p>
                     </div>
                 {% endif %}
-                {% if show_detail %}
                     <div class="row">
                         <div class="col-md-5 col-md-offset-1">
-                            <h3>Detailed scores:</h3>
+                        {% if show_detail %}
+                            <h3>Detailed (Borda) scores:</h3>
                             <ul class="list-group">
                                 {% for alternative_name , score_value in score %}
                                     <li class="list-group-item">
@@ -41,21 +41,23 @@
                                     </li>
                                 {% endfor %}
                             </ul>
+                        {% endif %}
                         </div>
-                     {% if nb_voter != None %}
-                        <div class="col-md-5 col-md-offset-1">
-                            <h3>Stats:</h3>
-                            <p><strong>{{ nb_voter }}</strong>  voter{{ nb_voter|pluralize }} already voted</p>
-                            {% if poll.private %}
-                                {% with total=poll.participant.all|length %}
-                                    <p><strong>{{ total }}</strong> voter{{ total|pluralize }} registered</p>
-                                {% endwith %}
-                            {% endif %}
-                            <p><strong>Progress of the poll</strong>: {{ poll.get_progress }}%</p>
-                        </div>
-                     {% endif %}
+                     <div class="col-md-5 col-md-offset-1">
+                        <h3>Stats:</h3>
+                        {% if nb_voter != None %}
+                        	<p><strong>{{ nb_voter }}</strong> voter{{ nb_voter|pluralize }} voted</p>
+                        {% else %}
+                        	<p><strong>No</strong> voters have voted</p>
+                        {% endif %}
+                        {% if poll.private %}
+                            {% with total=poll.participant.all|length %}
+                                <p><strong>{{ total }}</strong> voter{{ total|pluralize }} registered</p>
+                            {% endwith %}
+                        {% endif %}
+                        <p><strong>Remaining time:</strong> {{ poll.get_remaining_time }} hours</p>
                     </div>
-                {% endif %}
+                </div>
             </div>
         </div>
     </div>
